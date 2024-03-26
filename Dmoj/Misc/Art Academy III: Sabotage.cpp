@@ -1,13 +1,14 @@
 #include <bits/stdc++.h>
 #include <iostream>
+#include <queue>
 
 using namespace std;
 
 const int MAXN = 305;
 
-int n, m, k, q, col[MAXN], cnt[MAXN][20][4], cur = 1;
+int n, m, k, q, col[MAXN], cnt[MAXN][20][4], cur = 1,dp[35][20][MAXN][MAXN<<1];
 
-bool dp[35][20][MAXN][MAXN<<1], vis[MAXN];
+bool vis[MAXN];
 
 //n * k^4 might be too slow?
 
@@ -47,9 +48,16 @@ int main(){
     }
 
     //swap the query later
+    
     for(int a = 1; a <= k; a++){
         for(int b = a; b <= k; b++){
-            
+            dp[a][b][1][n] = 0;
+            for(int i = 1; i < cur; i++){
+                for(int j = 0; j <= 2*n; j++){
+                    if(dp[a][b][i][n] == -1) continue;
+                    dp[a][b][i+1][]
+                }
+            }
         }
     }
 
