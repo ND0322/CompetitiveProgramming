@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "vector": "cpp",
+        "iostream": "cpp",
+        "random": "cpp",
+        "regex": "cpp",
+        "span": "cpp",
+        "string": "cpp",
+        "__split_buffer": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "bitset": "cpp",
+        "ios": "cpp"
+    }
+}

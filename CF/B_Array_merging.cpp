@@ -1,0 +1,1 @@
+//approach: find either the max subarray that is not prefix or suffix, max suffix + max suffx, max prefix + max suffix, suffix + suffix

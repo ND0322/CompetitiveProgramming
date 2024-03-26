@@ -1,0 +1,1 @@
+{"name":"Local: trie","url":"/Users/nathan/Documents/Competitive Programming/Algos/trie.cpp","tests":[{"id":1707189661118,"input":"A\nAN\nASP\nAS\nASC\nASCII\nBAS\nBASIC","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"/Users/nathan/Documents/Competitive Programming/Algos/trie.cpp","group":"local","local":true}

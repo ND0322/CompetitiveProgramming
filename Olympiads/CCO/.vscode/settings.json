@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "queue": "cpp",
+        "set": "cpp",
+        "vector": "cpp",
+        "__node_handle": "cpp",
+        "iostream": "cpp",
+        "bitset": "cpp"
+    }
+}

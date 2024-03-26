@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "locale": "cpp",
+        "string": "cpp",
+        "vector": "cpp",
+        "iostream": "cpp",
+        "random": "cpp",
+        "__mutex_base": "cpp",
+        "atomic": "cpp",
+        "barrier": "cpp",
+        "condition_variable": "cpp",
+        "future": "cpp",
+        "latch": "cpp"
+    }
+}
