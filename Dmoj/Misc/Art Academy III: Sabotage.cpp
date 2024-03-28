@@ -48,7 +48,7 @@ int main(){
     }
 
     //swap the query later
-    
+
     for(int a = 1; a <= k; a++){
         for(int b = a; b <= k; b++){
             dp[a][b][1][n] = 0;
