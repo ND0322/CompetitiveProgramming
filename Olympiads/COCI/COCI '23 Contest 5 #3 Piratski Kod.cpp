@@ -3,10 +3,13 @@
 
 using namespace std;
 
+#define int long long
+
 const int MAXN = 5005;
 const int MOD = 1e9+7;
 
 int n, fib[MAXN], dp[MAXN], psa[MAXN];
+
 
 /*
 dp[i] => answer for length i
@@ -27,7 +30,7 @@ using arithmetic sum
 (fib[j+1]-1 + fib(j))/2 * (fib[j+1] - fib[j])
 */
 
-int main(){
+int32_t main(){
     cin >> n;
 
     fib[1] = 1;
@@ -35,9 +38,10 @@ int main(){
     
 
     for(int i = 2; i <= n; i++){
-        int pw = 2;
-        for(int j = 1; j <= i; j++){
-            dp[i] = (dp[i] + dp[i-j] * fib[j+1] - fib[j]) % MOD + pw * ((fib[j+1]-1 + fib[j])%MOD * (fib[j+1] - fib[j]+MOD)%MOD)%MOD;
+        int pw = 1;
+        for(int j = i; j >= 2; j--){
+            dp[i] = (dp[i] + (dp[i-j] * fib[j-1]) % MOD) % MOD;
+            dp[i] = ((((long long)(((((fib[j+1]-1 + fib[j])%MOD) * ((fib[j+1] - fib[j] + MOD)) % MOD)%MOD) * 500000004)%MOD) * pw) % MOD + dp[i])%MOD;
             pw = (pw<<1)%MOD;
         }
     }
