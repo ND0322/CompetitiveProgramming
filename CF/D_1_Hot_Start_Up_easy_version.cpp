@@ -15,11 +15,14 @@ int main(){
     while(tt--){
         cin >> n >> k;
 
-        memset(last,0,sizeof(last));
+        
         for(int i = 1; i <= n; i++) cin >> col[i];
-        for(int i = 1; i <= k; i++) cin >> a[i];
+        for(int i = 1; i <= k; i++){
+            cin >> a[i];
+            last[i] = 0;
+        }
         for(int i = 1; i <= k; i++) cin >> b[i];
-        for(int i = 1; i <= n; i++) psa[i] = psa[i-1] + (col[i] == col[i-1] ? b: a)[col[i]];
+        for(int i = 1; i <= n; i++)psa[i] = psa[i-1] + (col[i] == col[i-1] ? b: a)[col[i]];
 
         for(int i = 1; i <= n; i++){
             dp[i] = dp[i-1] + (col[i] == col[i-1] ? b : a)[col[i]];
