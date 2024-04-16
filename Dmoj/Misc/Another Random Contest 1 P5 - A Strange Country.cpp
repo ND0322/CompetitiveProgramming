@@ -8,7 +8,7 @@ using namespace std;
 //if this edge doesnt work for the first tree find the first one that works
 //probably binary search for that
 
-const int MAXN = 3005;
+const int MAXN = 5005;
 const int MAXM = 3e5+5;
 
 int n, m,k, parents[10005][MAXN], ans[MAXM];

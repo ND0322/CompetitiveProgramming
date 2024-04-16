@@ -3,46 +3,72 @@
 
 using namespace std;
 
-const int MAXN = 505;
+const int MAXN = 1005;
 const int MOD = 1e9+7;
 
-#define int long long
+int n, m, parents[MAXN*MAXN], cnt;
 
-int n, dp[MAXN][MAXN], a[MAXN], b[MAXN];
+long long ans = 1, dp[MAXN*MAXN];
 
-//store the main splits and do some sh in between
+bool grid[MAXN][MAXN];
 
-int solve(int i, int j){
-    if(i == n+1 && j == n+1) return 1;
-    if(i == n+1 || j == n+1) return 0;
+int find(int x){
+    while(x != parents[x]){
+        parents[x] = parents[parents[x]];
+        x = parents[x];
+    }
+    return x;
+}
 
-    if(dp[i][j] == -1){
-        dp[i][j] = 0;
+void uni(int x, int y){
+    x = find(x);
+    y = find(y);
 
-        long long sum = 0;
-        for(int l = i; l <= n; l++){
-            sum += a[l];
+    if(x == y) return;
+    dp[y] = (dp[x] * dp[y]) % MOD;
+    parents[x] = y;
 
-            long long res = 0;
-            for(int p = j; p <= n; p++){
-                res += b[p];
 
-                if(sum/(double)(l-i+1) <= res/(double)(p-j+1)) dp[i][j] = (dp[i][j] + solve(l+1,p+1)) % MOD;
-            }
+}
+
+int main(){
+    freopen("cave.in", "r", stdin);
+    freopen("cave.out", "w", stdout);
+    cin >> n >> m;
+
+    for(int i = 1; i <= n*m; i++){
+        parents[i] = i;
+        dp[i] = 1;
+    }
+
+    for(int i = 1; i <= n; i++){
+        for(int j = 1; j <= m; j++){
+            char c; cin >> c;
+
+            if(c == '.') grid[i][j] = 1;
         }
     }
 
-    return dp[i][j];
-}
 
-int32_t main(){
-    cin >> n;
+    for(int i = n-1; i >= 1; i--){
+        for(int j = 2; j < m; j++){
+            if(!grid[i][j]) continue;
+            if(grid[i][j+1]) uni(m*i+j, m*i+j+1);
+            if(grid[i+1][j]) uni((i+1)*m+j, m*i + j);
+        }
 
-    for(int i = 1; i <= n; i++) cin >> a[i];
-    for(int j = 1; j <= n; j++) cin >> b[j];
+        for(int j = 2; j < m; j++){
+            //only add answer for roots of components
+            if(grid[i+1][j] && find((i+1) * m + j) == (i+1) * m + j) ans = (ans * dp[(i+1)*m+j])%MOD;
+            if(grid[i][j] && find(i*m+j) == i*m+j){
+                dp[i*m+j]++;
+                dp[i*m+j] %= MOD;
+            }
+        }
 
-    memset(dp, -1, sizeof(dp));
+        
+    }
 
-    cout << solve(1,1) << "\n";
+    cout << ans << "\n";
 
 }

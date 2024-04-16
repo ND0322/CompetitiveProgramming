@@ -36,7 +36,7 @@ int main(){
         }
 
         //complete this boi using the other row
-        for(int j = i+1; j <= n)
+ 
 
 
 
