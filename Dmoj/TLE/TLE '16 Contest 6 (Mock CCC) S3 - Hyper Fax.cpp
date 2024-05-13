@@ -21,22 +21,26 @@ int32_t main(){
     sort(a+1,a+n+1);
 
     for(int i = 1; i <= n; i++){
+        for(int j = 1; j <= n; j++) dp[i][j][0] = dp[i][j][1] = -1e18;
+    }
+
+    int ind = -1;
+    for(int i = 1; i <= n; i++){
         psa[i] = psa[i-1] + a[i].second;
         if(!a[i].first){
             dp[i][i][0] = a[i].second;
             dp[i][i][1] = a[i].second;
+            ind = i;
         }
     }
 
-    for(int i = 1; i <= n; i++){
-        for(int j = 1; j <= n; j++) dp[i][j][0] = dp[i][j][1] = -1e18;
-    }
+    
 
-    for(int i = n; i >= 1; i--){
-        for(int j = i; j <= n; j++){
+    for(int i = ind; i >= 1; i--){
+        for(int j = ind; j <= n; j++){
             //expand l to the left
             //l+1 -> l
-            if(abs(a[i].first - a[i+1].first) <= dp[i+1][j][0]) dp[i][j][0] = max(dp[i][j][0], dp[i+1][j][0] + a[i].second - abs(a[i].first - a[i+1].second));
+            if(abs(a[i].first - a[i+1].first) <= dp[i+1][j][0]) dp[i][j][0] = max(dp[i][j][0], dp[i+1][j][0] + a[i].second - abs(a[i].first - a[i+1].first));
             //r -> l
             if(abs(a[i].first - a[j].first) <= dp[i+1][j][1]) dp[i][j][0] = max(dp[i][j][0], dp[i+1][j][1] + a[i].second - abs(a[i].first - a[j].first));
 
@@ -57,6 +61,7 @@ int32_t main(){
             
         }
     }
+
 
     cout << ans << "\n";
 }

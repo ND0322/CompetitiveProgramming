@@ -82,8 +82,7 @@ long long querys(int node, int l, int r, int x, int y){
 }
 
 int32_t main(){
-    freopen("haybales.in", "r", stdin);
-    freopen("haybales.out", "w", stdout);
+    
     cin >> n >> q;
 
     build(1,1,n);

@@ -4,6 +4,7 @@
         "deque": "cpp",
         "vector": "cpp",
         "set": "cpp",
-        "ios": "cpp"
+        "ios": "cpp",
+        "iomanip": "cpp"
     }
 }

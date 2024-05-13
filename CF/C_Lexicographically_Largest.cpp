@@ -95,7 +95,7 @@ int32_t main(){
         for(int i = 1; i <= n; i++){
             auto [x,id] = query(1,1,n,1,n);
             id = -id;
-            cout << x << " " << id << "\n";
+            //cout << x << " " << id << "\n";
             s.insert(x);
             update(1,1,n,id,id,-1e18);
             update(1,1,n,id,n,-1);
