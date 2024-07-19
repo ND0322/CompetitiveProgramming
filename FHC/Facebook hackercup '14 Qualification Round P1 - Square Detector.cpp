@@ -9,6 +9,8 @@ bool grid[MAXN][MAXN];
 
 
 int main() {
+    //freopen("in.txt", "r", stdin);
+    //freopen("out.txt", "w", stdout);
     int tt; cin >> tt;
 
     for(int _ = 1; _ <= tt; _++){
@@ -25,26 +27,38 @@ int main() {
             }
         }
 
-        if(sqrt(cnt) * sqrt(cnt) != cnt){
+
+        if((int)sqrt(cnt) * (int)sqrt(cnt) != cnt){
             cout << "Case #" << _ << ": NO\n";
             continue;
         }
 
+        
         int m = sqrt(cnt);
+
+       
 
         bool flag = 0;
 
 
         for(int i = 1; i+m-1 <= n; i++){
+            bool check = 0;
             for(int j = 1; j+m-1 <= n; j++){
+                if(!grid[i][j]) continue;
                 int cnt = 0;
 
                 for(int a = i; a <= i+m-1; a++){
-                    for(int b = j; b <= j+m-1; b++) cnt+=grid[i][j];
+                    for(int b = j; b <= j+m-1; b++)cnt+=grid[a][b];
                 }
 
                 if(cnt == m*m) flag = 1;
+                
+
+                check = 1;
+                break;
             }
+
+            if(check) break;
         }
 
         

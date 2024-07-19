@@ -5,6 +5,7 @@
         "vector": "cpp",
         "set": "cpp",
         "ios": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "string": "cpp"
     }
 }

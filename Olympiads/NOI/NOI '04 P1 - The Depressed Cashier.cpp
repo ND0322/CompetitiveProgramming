@@ -3,9 +3,11 @@
 
 using namespace std;
 
+#define int long long
 
 
-const int MAXN = 2e5+5;
+
+const int MAXN = 2e6+5;
 
 int q, k,n, st[MAXN<<1], ans, a[MAXN], upd;
 
@@ -13,19 +15,19 @@ bool removed[MAXN];
 
 
 void update(int i, int x){
-    for(st[i+=2e5] += x; i > 1; i >>=1) st[i>>1] = st[i] + st[i^1];
+    for(st[i+=2e6] += x; i > 1; i >>=1) st[i>>1] = st[i] + st[i^1];
 }
 
 int query(int l, int r){
     int ans = 0;
-    for(l += 2e5, r+=2e5; l < r; l >>=1, r>>=1){
+    for(l += 2e6, r+=2e6; l < r; l >>=1, r>>=1){
         if(l&1) ans += st[l++];
         if(r&1) ans += st[--r];
     }
     return ans;
 }
 
-int main(){
+int32_t main(){
     cin >> q >> k;
 
 
@@ -39,10 +41,11 @@ int main(){
         if(c == 'I'){
             int x; cin >> x;
 
-            update(x, 1);
             
             
-            if(x < k) removed[n] = 1;
+            
+            if(x < k)removed[n] = 1;
+            else update(x, 1);
             a[n] = x;
 
             n++;
@@ -58,7 +61,7 @@ int main(){
             }
 
             int lo = 0;
-            int hi = 2e5;
+            int hi = 2e6;
 
             int ans = -1;
 
@@ -66,7 +69,7 @@ int main(){
             while(lo <= hi){
                 int mid = (lo+hi)>>1;
 
-                if(query(mid,2e5) >= x){
+                if(query(mid,2e6) >= x){
                     ans = mid;
                     lo = mid+1;
                 }

@@ -1,69 +1,131 @@
 #include <bits/stdc++.h>
 #include <iostream>
+#include <set>
 
 using namespace std;
 
-const int MAXN = 1e4+5;
+const int MAXN = 5e5+5;
+const int MOD = 1e6+3;
 
-int n;
+int n, a[MAXN], dp[MAXN], st[MAXN<<1][2], nxt[MAXN][2], b[MAXN][2],  val[2][2];
 
-int query(int x, int y){
-    cout << "0 " << x << " " << y << "\n";
-    int res; cin >> res;
-    return res;
-}
+set<pair<int,int>> ranges[2][2], rem;
+bool rig[MAXN];
 
-void update(int x, int y){
-    cout << "1 " << x << " " << y << "\n";
-}
+//check all lights first with bsearch
+//first point where projected r is less than current r
+//then stuff with heavy
+//sweep from r to l
 
-/*
-for the dac
-have a vector of stuff for each array
-split into two groups: stuff smaller and stuff larger than this mid
-*/
 
-void dac(vector<int> a, vector<int> b){
-    if(!a.size()) return;
-    
-    int mid = a[a.size()/2];
-    int ind = 0;
 
-    vector<int> l,r;
-
-    for(int i : b){
-        int res = query(mid, i);
-
-        if(res == -1) l.push_back(i);
-        if(res == 1) r.push_back(i);
-        if(!res) ind = i;
+void update(int node, int l, int r, int i, int x, bool t){
+    if(l == r){
+        st[node][t] = x;
+        return;
     }
 
-    vector<int> la, ra;
+    int mid = (l+r)>>1;
 
-    for(int i : a){
-        if(i == mid) continue;
-        int res = query(i, ind);
+    if(i <= mid) update(node<<1, l, mid, i, x, t);
+    else update(node<<1|1, mid+1,r,i,x,t);
+    st[node][t] = min(st[node<<1][t], st[node<<1|1][t]);
+}
 
-        if(res == -1) ra.push_back(i);
-        if(res == 1) la.push_back(i);
+int query(int node, int l, int r, int x, int y, int t){
+    if(x > r || y < l) return 1e6;
+    if(x <= l && y >= r) return st[node][t];
+    int mid = (l+r)>>1;
+    return min(query(node<<1,l,mid,x,y,t), query(node<<1|1,mid+1,r,x,y,t));
+}
+
+void dfs(int l, int r, bool p, bool i){
+    while(ranges[p][i].lower_bound({l,1e6}) != ranges[p][i].end()){
+        auto [cr, cl] = *ranges[p][i].lower_bound({l,1e6});
+        ranges[p][i].erase(ranges[p][i].lower_bound({l,1e6}));
+        rem.insert({cr,cl});
+        dfs(cl, cr, p, i);
     }
-
-    update(mid, ind);
-    dac(la,l);
-    dac(ra,r);
 }
 
 int main(){
     cin >> n;
 
-    vector<int> a,b;
+    for(int i = 1; i <= n; i++) cin >> a[i];
+    for(int i = 1; i <= n; i++) nxt[i][0] = nxt[i][1] = 1e6;
 
+    //0 is matching 1 is opposite
     for(int i = 1; i <= n; i++){
-        a.push_back(i);
-        b.push_back(i);
+        nxt[b[a[i]][0]][i&1] = i;
+        nxt[b[a[i]][1]][!(i&1)] = i;
+        if(b[a[i]][0] || b[a[i]][1]) rig[i] = 1;
+        b[a[i]][i&1] = i;
     }
 
-    dac(a,b);
+
+    //for light on odd
+    //lights are normal
+    //even indices query the next thing with opposite parity
+
     
+    for(int i = 1; i <= n; i++){
+        if(i&1){
+            update(1,1,n,i, min(nxt[i][0],nxt[i][1]), 0);
+            update(1,1,n,i, nxt[i][1], 1);
+        }
+        else{
+            update(1,1,n,i, min(nxt[i][0],nxt[i][1]), 1);
+            update(1,1,n,i, nxt[i][1], 0);
+        }
+    }
+
+    //process all odds and evens seperate ish 
+    //iterate through for 4 different pointers
+
+    //instead of ranges fined leftmost stuff cause the ranges form intersections anyway
+
+    for(int i = n; i >= 1; i--){
+        //light first
+
+        if(nxt[i][0] == 1e6 && rig[i]) ;
+        else{
+            ranges[i&1][0].insert({nxt[i][0], i});
+            ranges[i&1][1].insert({nxt[i][0], i});
+        }
+        
+
+        int lo = 1;
+        int hi = n;
+
+        int r = 1e6;
+
+        
+
+        while(lo <= hi){
+            int mid = (lo+hi)>>1;
+
+            if(query(1,1,n,i, mid, !(i&1))-1 <= mid){
+                hi = mid-1;
+                r = mid;
+            }
+            else lo = mid+1;
+        }
+
+        cout << i << " " << r << "\n";
+
+        rem.clear();
+
+        while(ranges[i&1][0].lower_bound({r+1, 1e6}) != ranges[i&1][0].end()){
+            auto [cr,cl] = *ranges[i&1][0].lower_bound({r+1,1e6});
+            dfs(cl,cr,i&1, 0);
+        }
+
+        cout << "rem\n";
+
+        for(auto [r,l] : rem) cout << l << " " << r << "\n";
+
+        cout << "erem\n";
+
+
+    }
 }

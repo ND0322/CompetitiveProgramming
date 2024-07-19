@@ -35,12 +35,10 @@ void tarjans(int node,int par){
 
         if(!disc[child]){
             tarjans(child,node);
-
             low[node] = min(low[node],low[child]);
         }
-        else if(in[child]){
-            low[node] = min(low[node],disc[child]);
-        }
+        else if(in[child]) low[node] = min(low[node],disc[child]);
+        
     }
 
     if(low[node] == disc[node]){
