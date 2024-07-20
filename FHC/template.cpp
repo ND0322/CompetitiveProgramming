@@ -10,6 +10,6 @@ int main() {
 
     for(int _ = 1; _ <= tt; _++){
     
-        cout << "Case #" << _ << ": " << ans << "\n";
+        //cout << "Case #" << _ << ": " << ans << "\n";
     }
 }

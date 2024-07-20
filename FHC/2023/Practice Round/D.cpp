@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include <iostream>
 #include <stack>
+#include <queue>
 
 using namespace std;
 
@@ -13,9 +14,9 @@ using namespace std;
 //for each query we have to find the minimum distance to a special component for all nodes along the path 
 
 const int MAXN = 3e5+5;
-const int MAXB = 19;
+const int MAXB = 25;
 
-int n,m,q, low[MAXN], disc[MAXN], jmp[MAXN][MAXB], mn[MAXN][MAXB], comp[MAXN], t, cnt, col[MAXN], dp[MAXN], depth[MAXN];
+int n,m,q, low[MAXN], disc[MAXN], jmp[MAXN][MAXB], mn[MAXN][MAXB], comp[MAXN], t, cnt, col[MAXN], dp[MAXN], depth[MAXN], parent[MAXN], sz;
 
 bool in[MAXN], good[MAXN];
 
@@ -65,6 +66,7 @@ bool color(int node, int c){
 
     if(col[node]) return col[node] == c;
     col[node] = c;
+    sz++;
 
     
 
@@ -76,14 +78,29 @@ bool color(int node, int c){
     return 1;
 }
 
-void dfs(int node, int par){
+void bfs(){
     
-    dp[node] = !good[node] * 1e9;
+    queue<int> q;
+    fill(in+1, in+n+1,0);
+    for(int i = 1; i <= n; i++){
+        if(good[i]){
+            q.push(i);
+            in[i] = 1;
+        }
+    }
 
-    for(int child : adj2CC[node]){
-        if(child == par) continue;
-        dfs(child, node);
-        dp[node] = min(dp[node], dp[child]+1);
+    while(q.size()){
+        int node = q.front();
+
+        q.pop();
+
+        for(int child : adj2CC[node]){
+            if(in[child]) continue;
+            dp[child] = dp[node]+1;
+            in[node] = 1;
+
+            q.push(child);
+        }
     }
 }
 
@@ -97,7 +114,8 @@ void init(int node){
         if(jmp[node][0] == child) continue;
         depth[child] = depth[node]+1;
         jmp[child][0] = node;
-        mn[child][0] = dp[node];
+        mn[child][0] = dp[child];
+        init(child);
     }
 }
 
@@ -131,7 +149,7 @@ int lca(int x, int y){
         }
     }
 
-    return ans;
+    return min(dp[x],ans);
     
 }
 
@@ -142,7 +160,36 @@ int main() {
 
     for(int _ = 1; _ <= tt; _++){
 
+        cout << low[87148] << "\n";
+
         cin >> n >> m;
+
+        edges.clear();
+
+        while(st.size()) st.pop();
+
+        t = 0;
+        cnt = 0;
+
+        for(int i = 1; i <= n; i++){
+            low[i] = 0;
+            disc[i] = 0;
+            adj[i].clear();
+            in[i] = 0;
+            dp[i] = 0;
+            adj2[i].clear();
+            adj2CC[i].clear();
+            good[i] = 0;
+            comp[i] = 0;
+            col[i] = 0;
+            depth[i] = 0;
+
+            for(int j = 0; j < 25; j++){
+                jmp[i][j] = 0;
+                mn[i][j] = 1e9;
+            }
+
+        }
 
         for(int i = 1; i <= m; i++){
             int x,y; cin >> x >> y;
@@ -176,32 +223,42 @@ int main() {
 
         for(int i = 1; i <= n; i++){
             if(!col[i]){
+                sz = 0;
                 good[comp[i]] = !color(i, 1);
-                flag = 1;
+                flag |= (sz > 1) & (sz & 1);
             }
-        } 
+        }       
 
-        for(int i = 1; i <= n; i++) cout << i << " " << comp[i] << "\n";
+        for(int i = 1; i <= cnt; i++){
+            for(int j = 0; j < MAXB; j++) mn[i][j] = 1e9;
+        }  
 
-        
-
-        dfs(1, -1);
+        bfs();
 
         init(1);
 
-        cout << mn[3][0] << "\n";
+        /*
+                1               7
+                |               |
+                3               6
+               / \             / \
+              4   2           2  10
+              |               |
+              5               1
 
-        for(int i = 1; i <= cnt; i++) cout << dp[i] << "\n";
+        */
 
         int q; cin >> q;
+
+        long long ans = 0;
 
         while(q--){
             int x,y; cin >> x >> y;
 
-            if(!flag) cout << "-1\n";
-            else cout << min({dp[comp[x]], dp[comp[y]], lca(comp[x],comp[y])}) << "\n";
+            if(!flag) ans--;
+            else ans += min({dp[comp[x]], dp[comp[y]], lca(comp[x],comp[y])});
         }       
 
-        //cout << "Case #" << _ << ": " << ans << "\n";
+        cout << "Case #" << _ << ": " << ans << "\n";
     }
 }
