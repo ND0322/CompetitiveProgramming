@@ -23,6 +23,8 @@
 			"#include <bits/stdc++.h>",
 			"#include <iostream>\n",
 			"using namespace std;\n",
+
+			"//use ulimit -s unlimited\n",
 	
 			
 			"int main() {",

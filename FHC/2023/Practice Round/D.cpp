@@ -66,7 +66,6 @@ bool color(int node, int c){
 
     if(col[node]) return col[node] == c;
     col[node] = c;
-    sz++;
 
     
 
@@ -107,14 +106,14 @@ void bfs(){
 void init(int node){
     for(int i = 1; i < MAXB; i++){
         jmp[node][i] = jmp[jmp[node][i-1]][i-1];
-        mn[node][i] = min(mn[node][i], mn[jmp[node][i-1]][i-1]);
+        mn[node][i] = min(mn[node][i-1], mn[jmp[node][i-1]][i-1]);
     }
 
     for(int child : adj2CC[node]){
         if(jmp[node][0] == child) continue;
         depth[child] = depth[node]+1;
         jmp[child][0] = node;
-        mn[child][0] = dp[child];
+        mn[child][0] = dp[node];
         init(child);
     }
 }
@@ -124,7 +123,7 @@ pair<int,int> lift(int node, int d){
 
     for(int i = 0; i < MAXB; i++){
         if(d & (1<<i)){
-            ans = min(ans, mn[node][i]);
+            ans = min({ans, mn[node][i], dp[node]});
             node = jmp[node][i];
         }
     }
@@ -134,11 +133,12 @@ pair<int,int> lift(int node, int d){
 
 int lca(int x, int y){
     if(depth[x] < depth[y]) swap(x,y);
+
     
     int ans = lift(x, depth[x] - depth[y]).second;
     x = lift(x, depth[x] - depth[y]).first;
 
-    if(x == y) return ans;
+    if(x == y) return min(dp[x],ans);
 
     for(int i = MAXB-1; i >= 0; i--){
         if(jmp[x][i] != jmp[y][i]){
@@ -149,7 +149,7 @@ int lca(int x, int y){
         }
     }
 
-    return min(dp[x],ans);
+    return min(dp[jmp[x][0]],ans);
     
 }
 
@@ -159,8 +159,6 @@ int main() {
     int tt; cin >> tt;
 
     for(int _ = 1; _ <= tt; _++){
-
-        cout << low[87148] << "\n";
 
         cin >> n >> m;
 
@@ -223,9 +221,8 @@ int main() {
 
         for(int i = 1; i <= n; i++){
             if(!col[i]){
-                sz = 0;
                 good[comp[i]] = !color(i, 1);
-                flag |= (sz > 1) & (sz & 1);
+                flag |= good[comp[i]];
             }
         }       
 
@@ -234,6 +231,7 @@ int main() {
         }  
 
         bfs();
+
 
         init(1);
 
@@ -248,6 +246,7 @@ int main() {
 
         */
 
+
         int q; cin >> q;
 
         long long ans = 0;
@@ -257,7 +256,10 @@ int main() {
 
             if(!flag) ans--;
             else ans += min({dp[comp[x]], dp[comp[y]], lca(comp[x],comp[y])});
+            
         }       
+
+        //6 3 should be 0
 
         cout << "Case #" << _ << ": " << ans << "\n";
     }

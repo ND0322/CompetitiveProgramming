@@ -27,7 +27,7 @@ int main(){
         }
     }
 
-    //1 next to place is 1
+    //1 next to place is 1p 
     //1 0 0 1 0 0
     //brute some length of 0s greater than k and add some 1s in between
     //less than k doesnt need 1s

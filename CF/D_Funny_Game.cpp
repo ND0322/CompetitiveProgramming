@@ -26,7 +26,6 @@ int main(){
             cin >> a[i];
             vis[i] = 0;
         }
-
         vector<pair<int,int>> ans;
 
         for(int i = n-1; i >= 1; i--){

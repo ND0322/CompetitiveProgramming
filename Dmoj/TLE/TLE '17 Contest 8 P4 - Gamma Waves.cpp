@@ -1,56 +1,25 @@
 #include <bits/stdc++.h>
 #include <iostream>
 
-
 using namespace std;
 
-const int MAXN = 2005;
+const int MAXN = 2e5+5;
+int n,k, a[MAXN], b[MAXN], ans = 1e9;
 
+/*
+my guess is that you can swap only within in certain range which may just be the direct left and right 
 
+counter example
+n = 3, k = 10
 
-int n,k, a[MAXN], b[MAXN];
+a = 50 51 52
+b = 62 63 69
 
-bool used[MAXN];
+greedy answer = 1 + 1 + 1
 
+better answer
 
-
-int main(){
-    cin >> n >> k;
-
-    
-
-    for(int i = 0; i < n; i++){
-        cin >> a[i] >> b[i];
-        a[i] += k;
-    }
-    sort(a,a+n);
-    sort(b,b+n);
-
-    long long ans = 0;
-
-    for(int i = 0; i < n; i++){
-        pair<int,int> balls = {1e9,n};
-        bool flag = 0;
-        for(int j = 0; j < n; j++){
-            if(a[j] > b[i]){
-                used[j] = !flag;
-                flag = 1;
-                continue;
-                
-            }
-            if(used[j]) continue;
-            
-            cout << i << " " << j << " " << ceil((b[i]-a[j])/(double)k) << "\n";
-            balls = min(balls, {ceil((b[i]-a[j])/(double)k),j});
-            ans += ceil((b[i]-a[j])/(double)k);
-            a[j] += k * ceil((b[i]-a[j])/(double)k);
-        }
-        
-        if(!flag) used[balls.second] = 1;
-    }
-   
-
-    cout << ans << "\n";
-
-
-}
+3 -> 1 = 0
+1 -> 3 = 1
+2 -> 2 = 1
+*/
