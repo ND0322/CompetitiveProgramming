@@ -12,7 +12,7 @@ const int MAXN = 4e6+5;
 
 int n, q;
 
-bool state[MAXN];
+bool state[MAXN], press[MAXN];
 
 int main() {
     freopen("in.txt", "r", stdin);
@@ -23,26 +23,16 @@ int main() {
 
         cin >> n;
 
-        for(int i = 1; i <= n; i++) state[i] = 0;
+        for(int i = 1; i <= n; i++){
+            state[i] = 0;
+            press[i] = 0;
+        }
 
         string s; cin >> s;
         s = '.' + s;
 
-        cin >> q;
+        int cnt = 0;
 
-        while(q--){
-            int x; cin >> x;
-            state[x] ^= 1;
-        }
-
-        /*
-        0100
-        0110
-        0011
-        0010
-        */
-
-        int ans = 0;
         for(int i = 1; i <= n; i++){
             bool on = (s[i] - '0');
 
@@ -57,9 +47,29 @@ int main() {
                
             }
             if(!on) continue;
-
-            ans++;
+            press[i] = 1;
+            cnt++;
             state[i] ^= 1;
+        }
+
+
+        cin >> q;
+
+        long long ans = 0;
+
+        while(q--){
+            int x; cin >> x;
+            
+            if(press[x]){
+                cnt--;
+                press[x] = 0;
+            }
+            else{
+                cnt++;
+                press[x] = 1;
+            }
+
+            ans += cnt;
         }
 
 

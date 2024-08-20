@@ -1,0 +1,1 @@
+//brute all permutations and simulate 
