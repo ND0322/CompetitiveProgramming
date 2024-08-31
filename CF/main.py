@@ -1,16 +1,14 @@
-a = list(map(int,input().split(" ")))
-b = list(map(int,input().split(" ")))
+s = input()
 
-
-cnt = 0
-
-for i in range(len(a)):
-    for j in range(len(a)):
-        sm = 0
-        for k in range(i, j+1):
-            sm += a[i]
-            sm -= b[i]
-        
-        if(sm == 0):
-            cnt += 1
-print(cnt)
+ans = 0
+for i in range(len(s)):
+    for j in range(i+1, len(s)):
+        if(s[i] == s[j]):
+            ans+=1
+            print(i,j)
+            continue
+            
+        for k in range(i, j):
+            if((s[k] != s[i] or s[k] != s[j]) and s[k] != s[k+1]):
+                break
+print(ans)

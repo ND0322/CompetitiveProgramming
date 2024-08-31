@@ -3,48 +3,78 @@
 
 using namespace std;
 
-const int MAXN = 1e6+5;
+const int MAXN = 1005;
 
+//we will get the center of the path between two nodes
+//if we keep on querying the right and left seperately after rerooting it takes log2 guesses 
 
-//for some tree we can delete the whole tree to get some sz bits
-//process bits from high to low
-//if we have a bit thats already on and we get another set bit for that pos we can push it down one
-int n, a[MAXN];
+int par[MAXN];
+bool marked[MAXN], vis[MAXN][MAXN];
+
+int query(int x, int y){
+    cout << "? " << x << " " << y << "\n";
+    cout.flush();
+    int ans; cin >> ans;
+    return ans;
+}
+
+void dac(int x, int y){
+    if(x > y) swap(x,y);
+    if(vis[x][y]) return;
+    vis[x][y] = 1;
+    int mid = query(x,y);
+
+    if(mid == x || mid == y){
+        if(par[x] && !par[y]){
+            par[y] = x;
+            return;
+        }
+        if(par[y] && !par[x]){
+            par[x] = y;
+            return;
+        }
+        if(!par[x] && !par[y]){
+            par[x] = y;
+            return;
+        }        
+    }
+
+    
+
+    dac(x, mid);
+    dac(y, mid);
+
+}
 
 int main(){
-
     int tt; cin >> tt;
 
     while(tt--){
-        cin >> n;
-
-        memset(a,0,sizeof(a));
+        int n; cin >> n;
 
         for(int i = 1; i <= n; i++){
-            cin >> a[i];
-
-            for(int j = 1; j <= a[i]-1; j++){
-                int x; cin >> x;
-            }
-        
-        }
-        
-        int ans = 0;
-
-        for(int j = 20; j >= 0; j--){
-            for(int i = 1; i <= n; i++){
-                if(!(a[i] & (1<<j))) continue;
-                if(!(ans & (1<<j))) ans += (1<<j);
-                else{
-                    ans|= (1<<j)-1;
-                }
-            }
+            par[i] = 0;
+            marked[i] = 0;
         }
 
+        for(int i = 2; i <= n; i++){
+            if(par[i]) continue;
 
-        cout << ans << "\n";
+            dac(1,i);
+        }
+
+        for(int i = 1; i <= n; i++) cout << par[i] << " ";
+        cout << "\n";
+
+        cout << "! ";
+        for(int i = 1; i <= n; i++){
+            if(par[i]) cout << i << " " << par[i] << " ";
+        }
+
+        cout << "\n";
+
+        cout.flush();
+
+       
     }
-    
-
-   
 }

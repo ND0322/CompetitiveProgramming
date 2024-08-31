@@ -1,10 +1,36 @@
+#include <bits/stdc++.h>
+#include <iostream>
+#include <set>
+
+using namespace std;
+
 /*
 upperbound is min ai / 4
 1 2 3 are always possible
-if i and j are possible i*j is also possible?
-my guess is checking all primes 
-31 35 28 29 30
-1  2  1  2  0
-
-1  5  4  5  0
 */
+
+int main(){
+    int n; cin >> n;
+
+    set<int> s; 
+
+    for(int i = 1; i <= n; i++){
+        int x; cin >> x;
+        s.insert(x);
+    }
+
+    long long sm = 0;
+    for(int i = 1; i <= *s.begin()/4; i++){
+        set<int> f;
+
+        for(int j : s){
+            f.insert(j % i);
+            if(f.size() > 3) break;
+        }
+
+        if(f.size() <= 3) sm += i;
+    }
+
+    cout << sm << "\n";
+
+}

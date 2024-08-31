@@ -7,77 +7,44 @@ using namespace std;
 const int MAXN = 5005;
 const int MOD = 1e6+3;
 
-int n, a[MAXN], dp[MAXN];
+int n, a[MAXN], dp[MAXN], st[MAXN<<2][2], near[MAXN], nearl[MAXN], last[MAXN];
 
-//check all lights first with bsearch
-//first point where projected r is less than current r
-//then stuff with heavy
-//sweep from r to l
+pair<int,pair<int,int>> stl[MAXN<<2][2];
+
+//lazy seg tree keeping track of dps we can access as we slide right to left
+//r is easy to transition just consider the new i when sliding over
+//if a[l] is included in the previous range we will get old transitions and maybe new ones
+//otherwise we can only consider the stuff from near[l] onward 
+//all between near[l] and near[near[l]] can be claimed 
+//bsearch for the right we can have between near[l] and near[near[l]]
+//segtree for min near left + cnt min + one example representative 
+   
 
 int main(){
     cin >> n;
 
-    for(int i = 1; i <= n; i++) cin >> a[i];
+    for(int i = 1; i <= n; i++){
+        cin >> a[i];
+        last[a[i]] = n;
+    }
+
+    for(int i = n; i >= 1; i--){
+        near[i] = last[a[i]];
+        last[a[i]] = i;
+    }
+
+    
 
     dp[n+1] = 1;
-    for(int i = n; i >= 1; i--){
+    for(int i = n; i >= 1; i--){  
+    
 
-        set<int> op;
-        set<int> done;
-        set<int> no; 
+        for(int j =0; j < 2; j++){
 
-        //start with heavy
-        bool sn = 0;
-        for(int j = i; j <= n; j++){
-            if(no.find(a[j]) != no.end()) break;
-            if(!sn){
-                if(op.find(a[j]) != op.end()){
-                    op.erase(a[j]);
-                    done.insert(a[j]);
-                }
-                else if(done.find(a[j]) == done.end()) op.insert(a[j]);
-                
-
-            }
-            else{
-                if(done.find(a[j]) != done.end() || op.find(a[j]) != op.end()) break;
-                no.insert(a[j]);
-            }
-
-            if(op.empty()) dp[i] = (dp[j+1] + dp[i]) % MOD;
-
-            sn = !sn;
         }
 
-        //cout << i << " " << dp[i] << "\n";     
 
-        sn = 1;
-        op.clear();
-        done.clear();
-        no.clear();
-
-        for(int j = i; j <= n; j++){
-            if(no.find(a[j]) != no.end()) break;
-            if(!sn){
-                if(op.find(a[j]) != op.end()){
-                    op.erase(a[j]);
-                    done.insert(a[j]);
-                }
-                else if(done.find(a[j]) == done.end()) op.insert(a[j]);
-
-            }
-            else{
-                if(done.find(a[j]) != done.end() || op.find(a[j]) != op.end()) break;
-                no.insert(a[j]);
-                
-            }
-
-            if(op.empty()) dp[i] = (dp[j+1] + dp[i]) % MOD;
-
-            sn = !sn;
-        }
-
-        //cout << i << " " << dp[i] << "\n";     
+        
     }
 
     cout << dp[1] << "\n";

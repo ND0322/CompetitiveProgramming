@@ -2,71 +2,39 @@
 #include <iostream>
 #include <set>
 
+#pragma GCC optimize("Ofast,unroll-loops")
+#pragma GCC target("avx2,tune=native")
 
 using namespace std;
 
-const int MAXN = 3005;
-
-int n, deg[MAXN][MAXN], cnt;
-
-bool marked[MAXN][MAXN];
-
-set<pair<int,int>> extra;
-
-void dfs(int x, int y){
-    if(marked[x][y]) return;
-    deg[x+1][y]++;
-    deg[x][y+1]++;
-    deg[x-1][y]++;
-    deg[x][y-1]++;
-    marked[x][y] = 1;
-    cnt++;
-
-    vector<pair<int,int>> children;
-
-    if(deg[x+1][y] == 3) children.push_back({x+1,y});
-    if(deg[x-1][y] == 3) children.push_back({x-1,y});
-    if(deg[x][y+1] == 3) children.push_back({x,y+1});
-    if(deg[x][y-1] == 3) children.push_back({x,y-1});
-    if(deg[x][y] == 3) children.push_back({x,y});
-
-    for(auto [cx, cy] : children){
-        if(!marked[cx][cy]) continue;
-        if(!marked[cx-1][cy]){
-            dfs(cx-1, cy);
-            extra.insert({cx-1,cy});
-        }
-        if(!marked[cx+1][cy]){
-            dfs(cx+1, cy);
-            extra.insert({cx+1, cy});
-        }
-        if(!marked[cx][cy-1]){
-            dfs(cx, cy-1);
-            extra.insert({cx,cy-1});
-        }
-        if(!marked[cx][cy+1]){
-            dfs(cx, cy+1);
-            extra.insert({cx, cy+1});
-        }
-        
-    }
-
-
-}
+/*
+upperbound is min ai / 4
+1 2 3 are always possible
+*/
 
 int main(){
-    cin >> n;
+    cin.tie(NULL) -> ios_base::sync_with_stdio(0);
+    int n; cin >> n;
+
+    set<int> s; 
 
     for(int i = 1; i <= n; i++){
-        int x, y; cin >> x >> y;
-
-        x += 1500;
-        y += 1500;
-
-        dfs(x,y);
-
-        cout << cnt - i << "\n";
+        int x; cin >> x;
+        s.insert(x);
     }
 
+    long long sm = 0;
+    for(int i = 1; i <= *s.begin()/4; i++){
+        set<int> f;
+
+        for(int j : s){
+            f.insert(j % i);
+            if(f.size() > 3) break;
+        }
+
+        if(f.size() <= 3) sm += i;
+    }
+
+    cout << sm << "\n";
 
 }
