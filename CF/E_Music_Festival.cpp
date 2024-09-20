@@ -1,0 +1,4 @@
+/*
+compress arrays by having only increasing elements 
+we now know the l r range of each array 
+*/
