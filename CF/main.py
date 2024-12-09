@@ -1,14 +1,11 @@
-s = input()
+import random
 
-ans = 0
-for i in range(len(s)):
-    for j in range(i+1, len(s)):
-        if(s[i] == s[j]):
-            ans+=1
-            print(i,j)
-            continue
-            
-        for k in range(i, j):
-            if((s[k] != s[i] or s[k] != s[j]) and s[k] != s[k+1]):
-                break
-print(ans)
+# Generate an array of random length (e.g., 5 to 15) with values 0, 1, or 2
+array = [random.choice([0, 1, 2]) for _ in range(random.randint(5, 15))]
+
+# Ensure the array contains at least one `1`
+if 1 not in array:
+    array[random.randint(0, len(array) - 1)] = 1
+
+print(len(array))
+print(" ".join(list(map(str,array))))

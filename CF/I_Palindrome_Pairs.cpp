@@ -26,10 +26,15 @@ int main(){
     long long ans = 0;
 
     for(int i = 0; i < (1<<26); i++){
-        if(i == (i&((1<<27)-1))) ans += cnt[i] * (cnt[i]-1);
-        else ans += cnt[i] * cnt[i&((1<<27)-1)];
-        
+        ans += cnt[i] * (cnt[i]-1);
     }
+
+    //find the location of the set bit
+
+    for(int j = 0; j < (1<<26); j++){
+        for(int i = 0; i < 26; i++) ans += cnt[j] * cnt[(1<<i) ^ j];
+    }
+    
 
     cout << ans/2 << "\n";
 }

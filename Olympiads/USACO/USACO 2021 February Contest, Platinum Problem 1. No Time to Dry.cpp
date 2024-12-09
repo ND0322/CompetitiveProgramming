@@ -67,8 +67,7 @@ int main(){
             i++;
         }
 
-        ans[id] = r-l+1 - query(1,1,n,l,r)USACO 2022 US Open Contest, Silver
-Problem 1. Visits;
+        ans[id] = r-l+1 - query(1,1,n,l,r);
     }
 
     for(int i = 0; i < q; i++) cout << ans[i] << "\n";

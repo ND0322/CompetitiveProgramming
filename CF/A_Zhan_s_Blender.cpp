@@ -14,6 +14,6 @@ int main(){
 
         int x, y; cin >> x >> y;
 
-        cout << max(ceil(n/(double)x), ceil(n/ (double)y)) << "\n";
+        cout << max((int)ceil(n/(double)x), (int)ceil(n/ (double)y)) << "\n";
     }
 }

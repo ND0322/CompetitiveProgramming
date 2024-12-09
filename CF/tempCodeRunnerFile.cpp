@@ -3,47 +3,10 @@
 
 using namespace std;
 
-const int MAXN = 1005;
-
-//we will get the center of the path between two nodes
-//if we keep on querying the right and left seperately after rerooting it takes log2 guesses 
-
-int par[MAXN];
-bool marked[MAXN], vis[MAXN][MAXN];
-
-int query(int x, int y){
-    cout << "? " << x << " " << y << "\n";
-    cout.flush();
-    int ans; cin >> ans;
-    return ans;
-}
-
-void dac(int x, int y){
-    if(x > y) swap(x,y);
-    if(vis[x][y]) return;
-    vis[x][y] = 1;
-    int mid = query(x,y);
-
-    if(mid == x || mid == y){
-        if(par[x] && !par[y]){
-            par[y] = x;
-            return;
-        }
-        if(par[y] && !par[x]){
-            par[x] = y;
-            return;
-        }
-        if(!par[x] && !par[y]){
-            par[x] = y;
-            return;
-        }        
-    }
-
-    
-
-    dac(x, mid);
-    dac(y, mid);
-
+bool query(int i, int j){
+    cout <<"? " << i << " " << j << "\n";
+    bool x; cin >> x;
+    return x;
 }
 
 int main(){
@@ -52,29 +15,29 @@ int main(){
     while(tt--){
         int n; cin >> n;
 
-        for(int i = 1; i <= n; i++){
-            par[i] = 0;
-            marked[i] = 0;
+        int ans = -1;
+
+        for(int i = 1; i < n; i += 2){
+            if(query(i, i+1) != query(i+1, i)){
+                ans = i;
+                break;
+            }
         }
 
-        for(int i = 2; i <= n; i++){
-            if(par[i]) continue;
-
-            dac(1,i);
+        if(ans == -1){
+            cout << "! " << n << "\n";
+            continue;
         }
-
-        for(int i = 1; i <= n; i++) cout << par[i] << " ";
-        cout << "\n";
 
         cout << "! ";
-        for(int i = 1; i <= n; i++){
-            if(par[i]) cout << i << " " << par[i] << " ";
+
+        if(ans == 1){
+            if(query(ans+1, ans+2) != query(ans+2, ans+1)) cout << ans+1 << "\n";
+            else cout << ans << "\n";
         }
-
-        cout << "\n";
-
-        cout.flush();
-
-       
+        else{
+            if(query(ans, ans-1) != query(ans-1, ans)) cout << ans << "\n";
+            else cout << ans+1 << "\n";
+        }
     }
 }

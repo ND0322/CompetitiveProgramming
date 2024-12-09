@@ -1,43 +1,29 @@
-import matplotlib.pyplot as plt
+import openpyxl
 
-# Parameters
-springConst = 10.0    # spring constant (N/m)
-airConst = 0.1        # air resistance coefficient
-fricConst = 0.01      # friction coefficient
-mass = 1.0            # mass (kg)
-time_steps = 5000     # number of time steps
-dt = 0.01             # time step size in seconds
+path = "TOP500_202406.xlsx"
 
-# Initial conditions
-d = 1.0               # initial displacement (m)
-v = 0.0               # initial velocity (m/s)
-displacement = []     # list to store displacement values
 
-# Initial force calculation
-f = -springConst * d + pow(-1, v >= 0) * (v * v * airConst + mass * 9.81 * fricConst)
+wb = openpyxl.load_workbook(path)
 
-# Simulation loop
-for _ in range(time_steps):
-    # Update displacement based on current velocity
-    d += v * dt
-    
-    # Update velocity based on current force
-    v += (f / mass) * dt
-    
-    # Print the current state for debugging
-    print(f"Displacement: {d:.2f}, Velocity: {v:.2f}, Force: {f:.2f}")
-    
-    # Store the current displacement
-    displacement.append(d)
-    
-    # Recalculate the force for the next time step
-    f = -springConst * d + pow(-1, v >= 0) * (v * v * airConst + mass * 9.81 * fricConst)
+sheet = wb.active
 
-# Plotting the displacement over time
-time = [dt * i for i in range(time_steps)]
-plt.plot(time, displacement)
-plt.xlabel('Time (s)')
-plt.ylabel('Displacement (m)')
-plt.title('Displacement of a Damped Harmonic Oscillator Over Time')
-plt.grid(True)
-plt.show()
+
+
+sm = 0
+cnt = 0
+for i in range(2, 502):
+    if((sheet.cell(row = i, column = 21).value) is None):
+        continue
+    cnt += 1
+    sm += (sheet.cell(row = i, column = 15).value) * 1000 / (sheet.cell(row = i, column = 21).value)
+
+sm /= 1000
+
+Eavg = sm/cnt
+
+print("Avg Full Capacity kW: ", Eavg)
+print("Extrapolated Total Full Capacity kW", Eavg * 500)
+
+print("Avg Full Capacity tWh: ", Eavg * 365.25 * 24 / 1e9)
+print("Extrapolated Total Full Capacity tWh: ", Eavg * 500 * 365.25 * 24 / 1e9)
+

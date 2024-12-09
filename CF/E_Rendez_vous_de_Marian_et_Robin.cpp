@@ -1,0 +1,1 @@
+//simple dijkstras both side keep track of horse or not 
