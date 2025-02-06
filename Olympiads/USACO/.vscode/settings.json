@@ -10,6 +10,15 @@
         "barrier": "cpp",
         "condition_variable": "cpp",
         "future": "cpp",
-        "latch": "cpp"
+        "latch": "cpp",
+        "set": "cpp",
+        "__tree": "cpp",
+        "regex": "cpp",
+        "span": "cpp",
+        "__split_buffer": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     }
 }
