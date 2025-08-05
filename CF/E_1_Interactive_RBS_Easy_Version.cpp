@@ -1,0 +1,7 @@
+/*
+
+bsearch for first closing and opening respectively 
+
+
+
+*/

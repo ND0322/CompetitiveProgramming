@@ -3,24 +3,62 @@
 
 using namespace std;
 
-int main(){
-    int n; cin >> n;
+const int MAXN = 2e5+5;
+const int MOD = 998244353;
+//simple dp
 
-    vector<int> a(n+1);
+int n, m;
 
-    for(int i = 1; i <= n; i++) cin >> a[i];
+double dp[MAXN], p[MAXN], q[MAXN];
 
-    int m; cin >> m;
+vector<pair<int,int>> rs[MAXN];
 
-    for(int i = 1; i <= m; i++){
-        int x,y; cin >> x >> y;
-
-        if(abs(a[x] - a[y]) != 1) continue;
-
-        swap(a[x], a[y]);
-
+int quickpow(int a, int b){
+    int ans = 1;
+    while(b >= 1){
+        if(b & 1){
+            ans = (ans * b) % MOD;
+            b--;
+        }
+        else{
+            a = (a*a) % MOD;
+            b >>=1;
+        }
     }
 
-    for(int i = 1; i <= n; i++) cout << a[i] << " ";
-    cout << "\n";
+    return ans;
+}
+
+int main(){
+    cin >> n >> m;
+
+    double ans = 1;
+    for(int i = 1; i <= n; i++){
+        int l,r; cin >> l >> r;
+
+        rs[l].push_back({r, i});
+        cin >> p[i] >> q[i];
+
+        ans *= (q[i] - p[i]) / q[i];
+    }
+
+
+    dp[m+1] = 1;
+    dp[m] = 1;
+    for(int i = m-1; i >= 0; i--){
+
+        //val * 1/q-p * p
+        for(auto [r,j] : rs[i+1]) dp[i] += dp[r] * p[j] / (q[j] - p[j]);
+    }
+
+    /*
+    
+    1/9
+
+    2/3 + 1/6
+    */
+
+    cout << dp[3] << "\n";
+
+    cout << ans * dp[0] << "\n";
 }

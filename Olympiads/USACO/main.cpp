@@ -1,121 +1,80 @@
 #include <bits/stdc++.h>
 #include <iostream>
-#include <set>
-#include <map>
-
-#pragma GCC optimize("Ofast")
-#pragma GCC target("avx2")
-
 
 using namespace std;
 
-const int MAXN = 2e5+5;
+#define int long long
 
-int n, a[MAXN], c[MAXN], q;
+const int MAXN = 1e6+5;
+const int MOD = 1e9+7;
 
-long long dp[MAXN][3], ans[MAXN];
+//decompose the string into some blocks of m and o
+//work backwards
+//the last m will have suffix C K options
+//in the full problem no block of Os will ever have length > n
+//We will have some overflow zeros that apply to the next string
+//one copy should already take up all Os
 
-pair<int,int> s[MAXN],queries[MAXN];
 
-/*
-dp[node][3]
+long long fact[MAXN], k,n,l, r[MAXN];
 
-0 is < than m
-1 is equal to m
-2 is > than m
-*/
-
-long long med(int x, int y, int z) {
-	return x ^ y ^ z ^ min({x, y, z}) ^ max({x, y, z});
+long long quickpow(long long x, int y)
+{
+    long long res = 1;
+ 
+    x = x % MOD;
+ 
+    while (y > 0) {
+ 
+        
+        if (y & 1)
+            res = (res * x) % MOD;
+ 
+        
+        y = y >> 1;
+        x = (x * x) % MOD;
+    }
+    return res;
 }
 
 
+int32_t main(){
+    cin >> k >> n >> l;
 
-inline void update(int node, int m){
+    string s; cin >> s;
 
-    memset(dp[node], 0x3f, sizeof(dp[node]));
+    fact[0] = 1;
+    for(int i = 1; i <= n; i++) fact[i] = (fact[i-1] * i) % MOD;
 
-    if((node<<1) > n){
+    s = "." + s;
 
-        for(int i = 0; i < 3; i++) dp[node][i] = c[node];
+    int cnt = 0;
+    int ms = 0;
 
-        if(a[node] < m) dp[node][0] = 0;
-        if(a[node] == m) dp[node][1] = 0;
-        if(a[node] > m) dp[node][2] = 0;
-        return;
-    }
-
-    int lc = node<<1;
-    int rc = node<<1|1;
-
-    int cost[3] = {(a[node] >= m) * c[node], (a[node] != m) * c[node], (a[node] <= m) * c[node]};
-    for(int i = 0; i < 3; i++){
-        for(int j = 0; j < 3; j++){
-            for(int k = 0; k < 3; k++){
-
-                dp[node][med(i,j,k)] = min(dp[node][med(i,j,k)], dp[lc][j] + dp[rc][k] + cost[i]);
-            }
+    long long ans = 1;
+    for(int i = n; i >= 1; i--){
+        if(s[i] == 'O'){
+            cnt++;
+            continue;
         }
-    }
+        ms++;
 
-}
+        r[i] = cnt;
+        long long res = (fact[cnt] * quickpow(((fact[k] * fact[cnt-k]) % MOD), MOD-2)) % MOD;
+        cnt -= k;
 
-int main(){
-
-    cin.tie(NULL) -> ios_base::sync_with_stdio(0);
-    cout.tie(NULL);
-    
-    cin >> n;
-
-    for(int i = 1; i <= n; i++){
-        cin >> a[i] >> c[i];
-        s[i] = {a[i], i};
-    }
-
-    sort(s+1, s+n+1);
-
-    for(int i = n; i >= 1; i--) update(i, 0);
-
-    cin >> q;
-
-    for(int i = 1; i <= q; i++){
-        int x; cin >> x;
-        queries[i] = {x,i};
-    }
-
-    sort(queries+1, queries+q+1);
-
-    
-    int p = 1;
-    
-    for(int j = 1; j <= q; j++){
-
-        auto [x, ind] = queries[j];       
-
-        while(p <= n && s[p].first < x){
-            
-            int cur = s[p].second;
-            while(cur >= 1){
-                update(cur, x);
-                cur >>=1;
-            }
-
-            p++;
+        if(cnt < 0){
+            ans = 0;
+            break;
         }
 
-        for(int i = p; s[i].first == x; i++){
-            int cur = s[i].second;
-            while(cur >= 1){
-                update(cur, x);
-                cur >>=1;
-            }
-        }
-
-        ans[ind] = dp[1][1];
+        ans = (ans * res) % MOD;
     }
 
-    for(int i = 1; i <= q; i++) cout << ans[i] << "\n";
+    if((n - ms) != ms * k){
+        cout << "0\n";
+        return 0;
+    }
+    cout << quickpow(ans, l) << "\n";
 
-
-    
 }
