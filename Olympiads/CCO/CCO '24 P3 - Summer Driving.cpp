@@ -31,6 +31,8 @@ we take the largest node that can reach the rt
         9   5   7
 
 
+final phase will be b travelling to any node at proper depth except for subtree where it came up from
+
 
 
 
@@ -40,7 +42,7 @@ we take the largest node that can reach the rt
 int main(){
    cin >> n >> rt >> a >> b;
 
-   if(b > a){
+   if(b >= a){
       cout << "1\n";
       return 0;
    }

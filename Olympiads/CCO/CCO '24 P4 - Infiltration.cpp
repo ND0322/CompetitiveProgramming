@@ -27,11 +27,18 @@ we want to meet up first at 2 which is 1 and 3 centroid before moving again
       |   |
       1   9
 
+
+
+        1
+       / \
+      2   3
+     / \ / \
+    4  56   7
+
 centroid again rooted at 6
 
-perform something like centroid decomp
-for each node store the centroids it belongs to in decreasing order of depth and just run a bruteforce dfs from each one
-im gonna run 3 layers of decomp to start
+root at center of tree
+alterate binary steps 
 */
 
 const int MAXN = 105;
@@ -89,7 +96,7 @@ int main(){
 
     decomp(1,-1,0);
 
-    for(int i : centroids) cout <<i+1  << " ";
+    for(int i : centroids) cout << i  << " ";
     cout << "\n";
 
     

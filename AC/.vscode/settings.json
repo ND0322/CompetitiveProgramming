@@ -22,5 +22,6 @@
         "valarray": "cpp",
         "vector": "cpp",
         "random": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

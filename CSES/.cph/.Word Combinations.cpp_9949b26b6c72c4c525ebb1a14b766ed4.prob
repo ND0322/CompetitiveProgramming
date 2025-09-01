@@ -1,0 +1,1 @@
+{"name":"Local: Word Combinations","url":"/Users/nathan/Documents/CompetitiveProgramming/CSES/Word Combinations.cpp","tests":[{"id":1755778822565,"input":"ababc\n4\nab\nabab\nc\ncb","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"/Users/nathan/Documents/CompetitiveProgramming/CSES/Word Combinations.cpp","group":"local","local":true}
