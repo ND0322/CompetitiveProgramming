@@ -8,32 +8,11 @@ const int MOD = 1e9+7;
 
 #define int long long
 
-int n, dp[MAXN][MAXN], a[MAXN], b[MAXN];
+int n, dp[MAXN][MAXN], a[MAXN], b[MAXN], psa[MAXN][MAXN];
 
-//store the main splits and do some sh in between
 
-int solve(int i, int j){
-    if(i == n+1 && j == n+1) return 1;
-    if(i == n+1 || j == n+1) return 0;
+vector<pair<double,int>> sec[MAXN];
 
-    if(dp[i][j] == -1){
-        dp[i][j] = 0;
-
-        long long sum = 0;
-        for(int l = i; l <= n; l++){
-            sum += a[l];
-
-            long long res = 0;
-            for(int p = j; p <= n; p++){
-                res += b[p];
-
-                if(sum/(double)(l-i+1) <= res/(double)(p-j+1)) dp[i][j] = (dp[i][j] + solve(l+1,p+1)) % MOD;
-            }
-        }
-    }
-
-    return dp[i][j];
-}
 
 int32_t main(){
     cin >> n;
@@ -41,8 +20,59 @@ int32_t main(){
     for(int i = 1; i <= n; i++) cin >> a[i];
     for(int j = 1; j <= n; j++) cin >> b[j];
 
-    memset(dp, -1, sizeof(dp));
+    dp[n+1][n+1] = 1;
 
-    cout << solve(1,1) << "\n";
+    //precomp the things for k transition
+    for(int j = 1; j <= n; j++){
+        long long sm = 0;
+        for(int k = j; k <= n; k++){
+            sm += b[k];
+
+            sec[j].push_back({sm / (double)(k-j+1), k+1});
+        }
+
+        sort(sec[j].begin(), sec[j].end());
+    }
+
+    for(int i = n; i >= 1; i--){
+
+        //consider next for i and build psum
+
+        vector<pair<double,int>> nxt = {{0,0}};
+
+        long long sm = 0;
+
+        for(int k = i; k <= n; k++){
+            sm += a[k];
+            nxt.push_back({sm / (double)(k-i+1), k+1});
+        }
+
+        sort(nxt.begin(), nxt.end());
+
+        //all positions of second row
+        for(int j = 1; j <= n+1; j++){
+            for(int k = 1; k < nxt.size(); k++) psa[k][j] = (psa[k-1][j] + dp[nxt[k].second][j]) % MOD;
+        }
+
+     
+        for(int j = n; j >= 1; j--){
+            sm = 0;
+
+            int r = 0;
+
+            for(auto k : sec[j]){
+
+                while(r < nxt.size() && nxt[r].first <= k.first) r++;
+
+                dp[i][j] = (dp[i][j] + psa[r-1][k.second]) % MOD;
+            }
+
+
+    
+
+        }
+    }
+
+    cout << dp[1][1] << "\n";
 
 }

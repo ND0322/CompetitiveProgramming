@@ -1,0 +1,4 @@
+/*
+easy
+keep last direction as a state 
+*/

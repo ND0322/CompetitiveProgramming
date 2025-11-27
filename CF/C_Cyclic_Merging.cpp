@@ -1,0 +1,4 @@
+/*
+we select one elemnt to be the last element taken
+merge optimally on the prefix and suffix
+*/

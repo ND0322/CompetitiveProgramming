@@ -1,0 +1,12 @@
+/*
+we can basically change the question to lexicographical for nodes 
+lexigographical maximum cycle 
+
+directly simulate with like a queue or smth and each step take only max next color child
+
+eventually we will have one dominant path and a cycle that it goes through
+
+
+
+
+*/

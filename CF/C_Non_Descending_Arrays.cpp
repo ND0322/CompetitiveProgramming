@@ -1,0 +1,5 @@
+/*
+dp if we swap or not swap last one
+
+consider swapping and not swapping 
+*/

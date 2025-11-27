@@ -1,0 +1,5 @@
+/*
+euler circuit
+
+find all odd degree vertices and pair them by 
+*/

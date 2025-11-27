@@ -1,0 +1,6 @@
+/*
+binary search 
+
+after lift to the same level and begin lifting until lca
+
+*/

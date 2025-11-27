@@ -1,0 +1,6 @@
+/*
+concave function
+ternary search
+find left and right of possible locations
+
+*/

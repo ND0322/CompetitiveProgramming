@@ -1,0 +1,4 @@
+/*
+base sqrt n
+use one number as a sum
+*/

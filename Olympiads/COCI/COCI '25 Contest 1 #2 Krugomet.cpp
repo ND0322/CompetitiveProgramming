@@ -1,0 +1,8 @@
+/*
+functional graph
+
+find cycles and just do it 
+
+for each node we can find time to reach a cycle
+and we can find final node in cycle after certain time 
+*/
