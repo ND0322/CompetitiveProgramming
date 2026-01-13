@@ -1,183 +1,190 @@
 #include <bits/stdc++.h>
 #include <iostream>
-#include <queue>
 
 using namespace std;
 
-const int MAXN = 1e6+5;
-const int MOD = 1e6+3;
-const int MINV = 500002;
-
-
-#define int long long
-
-int n, a[MAXN], b[MAXN];
-
-
-
+const int MAXN = 2505;
+const int MAXM = 2e5+5;
 
 /*
-the question can be handled in three parts:
-from 1 to l of peak
-from l to r of peak
-from r of peak to n
+precompute for each cell the number of colors that they contain at least one of
+do this with PIE and difference array
 
-parts 1 and 3 we simply lift each one up to the pmax and smax respectively
-part 2 we lift to the peak height
+segtree over the number of shells in each grid
+query is a suffix sum
 
-we can split each mountain into searching prefix and suffix
-
-lets say we have a group of equal summed things
-
-obviusly for a chunk we should first raise the left and right respectively
-let l1 and r1 be the prefix and suffix max at l
-let l2 and r2 be prefix and suffix max at r
-
-it is clear that l1 == l2 and r2 == r2 the array a does not yet equal b
-
-total cost will be 2 * pref + 2 * suf - max(pref, suf)
-
-what is cost for group of length n to raise to min(pref, suf)
-
-((2 * pref + 2 * suf - max(pref, suf)) + 2 * (n-2)) * (delta-1)
-
-where delta = second smallest - smallest 
-
-for n = 1 it is just
-
-(delta - 1) * (pref + suf)
-
-
-we can maybe exchange argument for sub 2 
-
-notice that it is always optimal to raise the chunk with minimal value
-what do we do if there are multiple chunks?
-we should just collapse contiguous same value into one element with some math so now we just become a merge operation
-
-
-lets say we have
-
-
-5 2 2 2 2 6 7 4 2 2 2 2 6 
-
-denote p1 and s1 as prefix and suffix of group 1
-similarly p2 and 2 for group 2
-
-we always need to pay p1 and s2
-
-buy left first:
-
-p1 + s1 + 1 + s2
-
-buy right first
-
-p2 + s2 + 1 + p1 
-
-s2 + p1 + 1 + min(s1, p2)
-
-notice that if we have a third middle segment, the s and p are always at least as bad as the two edges so we should never raise it
-
-we can just look at the leftmost and rightmost occurence of x and disregard intervals (we only need the number of such x)
+updates subtract 1 from the grids it affects
+n^2 is just check every cell affected by the egg
+build dsu on each row and have it point to the next available/rightmost element in the set 
+for each one we just continue to look at sets that have not been touched 
+should amortize to o(n) for each row
 */
 
 
+int n,k, m, parents[MAXN][MAXN], r[MAXN][MAXN], st[MAXM<<2], diff[MAXN][MAXN];
 
-int32_t main(){
-    cin >> n;
+bool rem[MAXN][MAXN];
 
-    pair<int,int> peak = {-1,-1};
 
-    int pmax = 0;
+int find(int row, int x){
+    while(x != parents[row][x]){
+        parents[row][x] = parents[row][parents[row][x]];
+        x = parents[row][x];
+    }
+    return x;
+}
 
-    set<int> s;
+bool uni(int row, int x, int y){
+    x = find(row, x);
+    y = find(row, y);
 
-    long long ans = 0;
+    if(x == y) return 0;
+    parents[row][x] = y;
+    r[row][y] = max(x,y);
+    return 1;
+}
 
-    for(int i = 1; i <= n; i++){
-        cin >> a[i];
-        peak = max(peak, {a[i], i});
-        s.insert(a[i]);
-
-        pmax = max(pmax, a[i]);
-
-        b[i] = pmax;
+void update(int node, int l, int r, int i, int x){
+    if(l == r){
+        st[node] += x;
+        return;
     }
 
-    int smax = 0;
+    int mid = (l+r)>>1;
+    if(i <= mid) update(node<<1,l,mid, i, x);
+    else update(node<<1|1, mid+1,r,i,x);
+    st[node] = st[node<<1] + st[node<<1|1];
+}
 
-    for(int i = n; i >= peak.second; i--){
-        smax = max(smax, a[i]);
-        b[i] = smax;
-    }
+int query(int node, int l, int r, int x, int y){
+    if(x > r || y < l) return 0;
+    if(x <= l && y >= r) return st[node];
 
-    for(int i = 1; i <= n; i++) ans = (ans + (((b[i] + a[i]-1) % MOD) * ((b[i] - a[i]) % MOD) * MINV) % MOD) % MOD;
-    
+    int mid = (l+r)>>1;
 
-    //we can just shrink the search space later when stuff reachs b
+    return query(node<<1, l, mid, x, y) + query(node<<1|1, mid+1,r,x,y);
+}
 
-    
-
-    for(int i : s){
-        int l = 1e9;
-        int r = 0;
-        for(int j = 1; j <= n; j++){
-            if(a[j] == b[j]) continue;
-
-            if(a[j] == i){
-                l = min(l, j);
-                r = max(r, j);
-            }
-        }
-
-        if(r == 0) continue;
-
-        cout << l << " " << r << " " << i << "\n";
-        int s1 = 1e9;
-        int s2 = 1e9;
-        int p1 = 1e9;
-        int p2 = 1e9;
+void add(int x1, int y1, int x2, int y2, int v){
+    diff[x1][y1] += v;
+    diff[x2+1][y1] -= v;
+    diff[x1][y2+1] -= v;
+    diff[x2+1][y2+1] += v;
+}
 
 
-        for(int j = l; j <= n; j++){
-            if(a[j] > i) s1 = min(s1, a[j]);
-        }
+int main(){
+    cin >> n >> k;
 
-        for(int j = r; j <= n; j++){
-            if(a[j] > i) s2 = min(s2, a[j]);
-        }
+    k--;
 
+    cin >> m;
 
-        for(int j = 1; j <= r; j++){
-            if(a[j] > i) p2 = min(p2, a[j]);
-        }
+    for(int i = 1; i <= m; i++){
+        int l; cin >> l;
+
+        vector<pair<int,int>> shells;
 
         for(int j = 1; j <= l; j++){
-            if(a[j] > i) p1 = min(p1, a[j]);
+            int x,y; cin >> x >> y;
+
+            shells.push_back({x,y});
         }
 
-        int cnt = 0;
+        for(int mask = 1; mask < 1<<l; mask++){
 
-        //can do with BIT or policy based or smart update segment tree or precomputing
-        for(int j = l; j <= r; j++) cnt += (a[j] > i);
+            int tlx = 0;
+            int tly = 0;
+            int brx = 1e9;
+            int bry = 1e9;
+            for(int j = 0; j < l; j++){
+                if(mask & (1<<j)){
+                    tlx = max(tlx, shells[j].first);
+                    tly = max(tly, shells[j].second);
+                    brx = min(brx, shells[j].first);
+                    bry = min(bry, shells[j].second);
+                }
+            }
 
-        if(l == r) ans = (ans + ((*next(s.find(i)) - i) * (p1 + s2) % MOD) % MOD) % MOD;
-        
-        else{
-            int dif = (*next(s.find(i)) - i) % MOD;
-            int ext = ((((((r-l-cnt-1) % MOD * ((*next(s.find(i)) + i - 1) % MOD)) % MOD) * dif) % MOD) + (((*next(s.find(i)) + i - 1) * dif) % MOD * MINV) % MOD) % MOD;
+            tlx -= k;
+            tly -= k;
 
-            ans = ((ans + (dif * ((p1 + s2 + min(s1, p2) + 1) % MOD + (2 * (r-l+1 - cnt - 2)) % MOD)) % MOD) % MOD + ext) % MOD;
+
+            tlx = max(tlx, 1);
+            tly = max(tly, 1);
+            brx = min(brx, n-k);
+            bry = min(bry, n-k);
+            if(tlx > brx || tly > bry) continue;
+
+            add(tlx, tly, brx, bry, pow(-1, !(__builtin_popcount(mask) & 1)));
         }
-        
-           
-
-        for(int j = l; j <= r; j++) a[j] = max(a[j], *next(s.find(i)));
-
-        
     }
+
+    for(int i = 1; i <= n; i++){
+        for(int j = 1; j <= n; j++) diff[i][j] += diff[i-1][j];
+    }
+
+    for(int i = 1; i <= n; i++){
+        for(int j = 1; j <= n; j++) diff[i][j] += diff[i][j-1];
+    }
+
+    double tot = 0;
+    for(int i = 1; i <= n; i++){
+        for(int j = 1; j <= n; j++){
+            parents[i][j] = i;
+            r[i][j] = i;
+            update(1,1,m, diff[i][j], 1);
+
+            if(i + k <= n && j + k <= n) tot++;
+        }
+    }
+
     
 
+    int q; cin >> q;
+    while(q--){
+    
+        int t; cin >> t;
 
-    cout << ans << "\n";
+        if(t == 1){
+            int x, y; cin >> x >> y;
 
+            
+            for(int i = max(x-k, 1); i <= min(x, n); i++){
+                int ty = max(y-k, 1);
+
+                while(ty <= min(y+k, n)){
+                    cout << i << " " << ty << "\n";
+                    if(!rem[i][ty]){
+                        rem[i][ty] = 1;
+                        update(1,1,m, diff[i][ty], -1);
+                    }
+
+                    if(ty > 1 && rem[i][ty-1]) uni(i, ty-1, ty);  
+                    ty = r[i][find(i, ty)]+1;
+                }
+            }
+
+            
+
+            
+        }
+        else{
+            int x; cin >> x;
+
+            //calculate tot
+
+            cout << setprecision(5) << fixed << query(1,1,m, x, m) / tot << "\n";
+            
+        }
+
+        
+
+       
+    }
+
+
+
+
+    
 }
