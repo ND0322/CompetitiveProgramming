@@ -1,2 +1,5 @@
-//each edge will either allow or not allow travel
-//probability that an edge is chosen
+/*
+
+
+dpu = sum dpv * 1/popcount * 1 / distibutions 
+*/

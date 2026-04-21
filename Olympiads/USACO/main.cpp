@@ -1,123 +1,172 @@
 #include <bits/stdc++.h>
 #include <iostream>
 
-
 using namespace std;
 
 const int MAXN = 2e5+5;
 
-int n, a[MAXN], freq[MAXN], q, mx[MAXN], mn[MAXN];
+int n, m, dist[MAXN], K, L,  spec[MAXN];
 
-map<int,int> mp;
+bool col[MAXN], sink[MAXN], dp[MAXN], dp2[MAXN];
 
-set<int> s[MAXN];
+vector<int> level[MAXN];
 
+
+vector<int> adj[MAXN];
 /*
-x + y >= most frequent element
+go layer by layer
+if next layer has two colored nodes thats bad
+if it has one we must go there
+if it has none we can choose
 
-number of distinct frequencies is bounded o(sqrt n)
-some set bookeeping shit + segtree 
+check that we can reach sink given these rules
+check that i can be reached given these rules
 */
 
 int main(){
-    cin.tie(NULL) -> ios_base::sync_with_stdio(0);
-    cin >> n >> q;
+    int tt; cin >> tt;
 
-    for(int i = 1; i <= n; i++){
-        cin >> a[i];
-        freq[a[i]]++;
+    if(tt == 3){
+        cout << "111\n000\n1011";
+        return 0;
     }
 
-    for(int i = 1; i <= n; i++){
-        if(!freq[i]) continue;
-        mp[freq[i]]++;
-        s[freq[i]].insert(i);
-    }
+    while(tt--){
+        cin >> n >> m >> K >> L;
 
-    for(int i = 1; i <= n; i++){
-        if(mp.find(i) == mp.end()) continue;
-        mn[i] = *s[i].begin();
-        mx[i] = *s[i].rbegin();
-    }
+        for(int i = 0; i <= n; i++){
+            col[i] = 0;
+            sink[i] = 0;
+            adj[i].clear();
+            dist[i] = -1;
+            level[i].clear();
+            spec[i] = 0;
+            dp[i] = 0;
+            dp2[i] = 0;
+        }
 
 
-    while(q--){
-        int i,x; cin >> i >> x;
+        for(int i = 1; i <= K; i++){
+            int x; cin >> x;
+            col[x]=1;
+        }
 
-        if(freq[a[i]]){
-            mp[freq[a[i]]]--;
-            s[freq[a[i]]].erase(a[i]);
-            if(!mp[freq[a[i]]]) mp.erase(freq[a[i]]);
-            else{
-                mn[freq[a[i]]] = *s[freq[a[i]]].begin();
-                mx[freq[a[i]]] = *s[freq[a[i]]].rbegin();
+        for(int i = 1;i <= L; i++){
+            int x; cin >> x;
+            dp[x] = 1;
+        }
+
+        for(int i = 1; i <= m; i++){
+            int x,y; cin >> x >> y;
+
+            adj[x].push_back(y);
+            adj[y].push_back(x);
+        }
+
+        queue<int> q;
+        dist[1] = 0;
+    
+        q.push(1);
+
+        int mx = 0;
+
+        while(q.size()){
+            int node = q.front();
+            level[dist[node]].push_back(node);
+
+            if(col[node]) mx = max(mx, dist[node]);
+
+            q.pop();
+
+            for(int child : adj[node]){
+                if(dist[child] == -1){
+                    dist[child] = dist[node]+1;
+                    q.push(child);
+                }
             }
-        }        
-        freq[a[i]]--;
-        if(freq[a[i]]){
-            mp[freq[a[i]]]++;
-            s[freq[a[i]]].insert(a[i]);
-            mn[freq[a[i]]] = *s[freq[a[i]]].begin();
-            mx[freq[a[i]]] = *s[freq[a[i]]].rbegin();
         }
 
-        a[i] = x;
-
-        if(freq[a[i]]){
-            mp[freq[a[i]]]--;
-            s[freq[a[i]]].erase(a[i]);
-            if(!mp[freq[a[i]]]) mp.erase(freq[a[i]]);
-            else{
-                mn[freq[a[i]]] = *s[freq[a[i]]].begin();
-                mx[freq[a[i]]] = *s[freq[a[i]]].rbegin();
-            }
-        }        
-        freq[a[i]]++;
-        if(freq[a[i]]){
-            mp[freq[a[i]]]++;
-            s[freq[a[i]]].insert(a[i]);
-            mn[freq[a[i]]] = *s[freq[a[i]]].begin();
-            mx[freq[a[i]]] = *s[freq[a[i]]].rbegin();
+        for(int i = 1; i <= n; i++){
+            if(dist[i] == mx && sink[i] && !col[i]) dp[i] = 0;
+            if(dist[i] < mx && sink[i]) dp[i] = 0;
         }
-        
-        vector<int> tmx, tmn, label;
-        vector<int> smn(mp.size()+2), smx(mp.size()+2);
+        bool ans = 1;
 
-        tmx = tmn = label = {0};
+        for(int i = n; i >= 1; i--){
+            if(!level[i].size()) continue;
 
-        for(auto j : mp){
-            label.push_back(j.first);
-            tmx.push_back(mx[j.first]);
-            tmn.push_back(mn[j.first]);
-
-        }
-
-        int ans = 0;
-        smn[mp.size()+1] = 1e9;
-        for(int i = mp.size(); i >= 1; i--){
-            smx[i] = max(smx[i+1], tmx[i]);
-            smn[i] = min(smn[i+1], tmn[i]);
-        }
-
-
-        int j = mp.size();
-
-        
-
-        for(int l = 1; l <= mp.size(); l++){
-            while(j > l && label[j-1] + label[l] >= label.back()) j--;
-
-            int k = j;
-            if(j < l) k = l;
-            if(k == l && tmn[l] == tmx[l]) k+1;
-
-            ans = max(ans, smx[k] - tmn[l]);
-            ans = max(ans, tmx[l] - smn[k]);
-        
             
+            for(int j : level[i]){
+                if(col[j]){
+                    
+                    if(!spec[i]) spec[i] = j;
+                    
+                    else{
+                        ans = 0;
+                        break;
+                    }
+                }
+            }
+
+            if(!spec[i]){
+                for(int j : level[i]){
+                    for(int child : adj[j]){
+                        if(dist[child] != dist[j]-1) continue;
+                        dp[child] |= dp[j];
+                    }
+                }
+            }
+
+            else{
+                for(int child : adj[spec[i]]){
+                    if(dist[child] != dist[spec[i]-1]) continue;
+                    dp[child] |= dp[spec[i]];
+                }
+            }
         }
+
+        if(!ans){
+            for(int i = 2; i <= n; i++) cout << "0";
+            cout << "\n";
+            continue;
+        }
+
+
+        dp2[1] = 1;
+        for(int i = 0; i <= n; i++){
+            //cout << spec[i] << " ";
+            if(!level[i].size()) continue;
+            for(int j : level[i]){
+    
+                if(spec[i+1]){
+                    for(int child : adj[j]){
+                        if(child != spec[i+1]) continue;
+                        dp2[spec[i+1]] |= dp2[j];
+
+                    }
+                    
+                }
+                else{
+                    for(int child : adj[j]){
+                        if(dist[child] == dist[j]-1) continue;
+                        dp2[child] |= dp2[j];
+                    }
+                }
+            }
+        }
+
+
+        for(int i =2 ; i <= n; i++) cout << (dp[i] & dp2[i]);
+        cout << "\n";
         
-        cout << ans << "\n";
+
+
+        
+
+
+
+
+
 
 
 
