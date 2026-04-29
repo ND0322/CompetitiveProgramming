@@ -1,53 +1,47 @@
 #include <bits/stdc++.h>
-#include <iostream>
-
 using namespace std;
 
-const int MAXN = 15;
+#define int long long
+const int MX = 1e8;
 
-int n,m;
+int32_t main() {
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
 
-vector<int> di = {1, 0, -1, 0}, dj = {0, 1, 0, -1};
+    int n, k;
+    cin >> n >> k;
 
-bool grid[MAXN][MAXN], vis[MAXN][MAXN];
+    vector<int> a(n);
+    for (int &x : a) cin >> x;
 
-bool dfs(int sx, int sy, int x, int y, int lx, int ly){
-    if(x > n || x < 1 || y > m || y < 1) return 0;
-    if(!grid[x][y]) return 0;
-    if(vis[x][y] && x == sx && y == sy) return 1;
-    
-    
-    vis[x][y] = 1;
+    int ans = 0;
 
-    for(int i = 0; i < 4; i++){
-        if(lx == x + di[i] && ly == y + dj[i]) continue;
-        if(dfs(sx, sy, x + di[i], y + dj[i], x, y)) return 1;
-    }
-    return 0;
-}
-int main(){
-    cin >> n >> m;
+    for (int x : a) {
+        int sq = sqrt(x);
 
-    for(int i = 1; i <= n; i++){
-        string s; cin >> s;
+        // Case 1: small j (direct)
+        for (int j = 1; j <= min(k, sq); j++) {
+            int val = (x / j) * (x + 2);
+            ans += min(MX, val);
+        }
 
-        for(int j = 0; j < m; j++) grid[i][j+1] = (s[j] == '.');
-    }
+        // Case 2: group by floor(x / j)
+        for (int v = 1; v <= sq; v++) {
+            int L = x / (v + 1) + 1;
+            int R = x / v;
 
-    bool ans = 1;
+            L = max(L, sq+1);
 
+            if (L > k) continue;
+            R = min(R, k);
+            if (L > R) continue;
 
-    for(int i = 1; i <= n; i++){
-        for(int j = 1; j <= m; j++){
-            if(!grid[i][j]) continue;
+            int val = v * (x + 2);
+            val = min(val, MX);
 
-            memset(vis, 0, sizeof(vis));
-
-            ans &= dfs(i,j,i,j, -1, -1);
+            ans += (R - L + 1) * val;
         }
     }
 
-    cout << !ans << "\n";
-
-
+    cout << ans << "\n";
 }
