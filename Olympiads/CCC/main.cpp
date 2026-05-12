@@ -4,9 +4,6 @@
 #include <ext/pb_ds/assoc_container.hpp> 
 #include <ext/pb_ds/tree_policy.hpp>
 
-#pragma GCC target("avx2")
-#pragma GCC optimize("O3")
-#pragma GCC optimize("unroll-loops")
 
 using namespace std;
 using namespace __gnu_pbds;
@@ -23,9 +20,11 @@ rb_tree_tag,
 tree_order_statistics_node_update>
 ost;
 
+
+
 const int MAXN = 3e5+5;
 
-int n, a[MAXN], m;
+int n, a[MAXN], m, cnt[MAXN];
 
 long long k;
 /*
@@ -42,11 +41,11 @@ for each cart we need to guarentee num less in the suffix <= side track
 struct Node{
     int lz = -1;
     int sm = 0;
-    int mn = 1e9;
+    int mn = 0;
     
 } st[MAXN<<2];
 
-void pushdown(int node, int l, int r, int mid){
+inline void pushdown(int node, int l, int r, int mid){
     if(st[node].lz == -1) return;
     st[node<<1].lz = st[node].lz;
     st[node<<1|1].lz = st[node].lz;
@@ -62,10 +61,10 @@ void pushdown(int node, int l, int r, int mid){
     st[node].lz = -1;
 }
 
-void build(int node, int l, int r){
+inline void build(int node, int l, int r){
     st[node].lz = -1;
     st[node].sm = 0;
-    st[node].mn = 1e9;
+    st[node].mn = 0;
     if(l == r) return;
     int mid = (l+r)>>1;
     build(node<<1, l, mid);
@@ -74,7 +73,7 @@ void build(int node, int l, int r){
 }
 
 
-void update(int node, int l, int r, int x, int y, int v){
+inline void update(int node, int l, int r, int x, int y, int v){
     if(x > r || y < l) return;
     if(x <= l && y >= r){
         st[node].lz = v;
@@ -91,7 +90,7 @@ void update(int node, int l, int r, int x, int y, int v){
     st[node].mn = min(st[node<<1].mn, st[node<<1|1].mn);
 }
 
-int query(int node, int l, int r, int x, int y){
+inline int query(int node, int l, int r, int x, int y){
     if(x > r || y < l) return 0;
     if(x <= l && y >= r) return st[node].sm;
     int mid = (l+r)>>1;
@@ -99,48 +98,39 @@ int query(int node, int l, int r, int x, int y){
     return query(node<<1, l, mid, x, y) + query(node<<1|1, mid+1, r, x, y);
 }
 
-int qr(int node, int l, int r, int x, int y, int v){
+inline int qr(int node, int l, int r, int x, int y, int v){
     if(x > r || y < l) return -1;
     if(st[node].mn > v) return -1;
     if(l == r) return l;
 
     int mid = (l+r)>>1;
     pushdown(node, l, r, mid);
-    int left = qr(node<<1, l, mid, x, y, v);
-    if(left != -1) return left;
-    return qr(node<<1|1, mid+1,r,x,y,v);
+    int right = qr(node<<1|1, mid+1,r,x,y,v);
+    if(right != -1) return right;
+    return qr(node<<1, l, mid, x, y, v);
 }
 
 
-bool can(int x){
 
+bool can(int x){
     long long tot = 0;
     build(1,1,m+1);
-    ost s;
     int l = m+1;
     for(int i = n; i >= 1; i--){
 
         if(a[i] == 0){
             l--;
-            update(1,1,m+1,l,l,0);
             continue;
         }
 
-
-
-        //this will be an ordered set later
-
-        int cnt = s.order_of_key(a[i]);
-        s.insert(a[i]);
-        if(cnt > x) return 0;
-        
-        int r = qr(1,1,m+1, l,m, a[i]);
+        if(cnt[i] > x) return 0;
+        int r = qr(1,1,m+1, l, m, a[i]);
 
         if(r == -1) continue;
         
-        if(cnt + r - l + 1 <= x) continue;
-        tot += (r  - l -x + cnt + 1) * a[i] - query(1,1,m+1, l+x-cnt, r);
-        update(1,1,m+1, l+x-cnt, r, a[i]);
+        if(cnt[i] + r - l + 1 <= x) continue;
+        tot += (r  - l -x + cnt[i] + 1) * a[i] - query(1,1,m+1, l+x-cnt[i], r);
+        update(1,1,m+1, l+x-cnt[i], r, a[i]);
     }
     return tot <= k;
 }
@@ -158,6 +148,15 @@ int32_t main(){
     
 
     int lo = 0;
+
+    ost s;
+
+    for(int i = n; i >= 1; i--){
+        if(!a[i]) continue;
+        lo = max(lo,(int)s.order_of_key(a[i]));
+        cnt[i] = (int)s.order_of_key(a[i]);
+        s.insert(a[i]);
+    }
     int hi = n;
 
     int ans = 0;
