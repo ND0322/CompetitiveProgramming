@@ -1,0 +1,6 @@
+/*
+number of different mk is sqrt n
+
+
+
+*/

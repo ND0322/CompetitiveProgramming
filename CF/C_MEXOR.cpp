@@ -1,0 +1,4 @@
+/*
+we will have runs of the same prefix mex values
+parity of run lengths 
+*/

@@ -5,27 +5,65 @@ using namespace std;
 
 const int MAXN = 2e5+5;
 
-int n, a[MAXN], b[MAXN], dp[MAXN];
+int n, a[MAXN], dp[MAXN][2], dp2[MAXN];
+
 
 vector<int> adj[MAXN];
 
-//constructing a rooted tree is probably optimal
+/*
+let dp0[u] be the number of citizens from u going downwards
+and dp1[u] be the number of citizens from u going upwards
+
+lets say we have some mask representing children edge directions
+
+we need to convolve i and j such that i^j == 1
+
+that passes for d <= 18, maybe meet in the middle for 36?
+maybe sqrt as well
+*/
 
 void dfs(int node, int par){
-    dp[node] = 0;
-    b[node] = 0;
+    int sz = 0;
+
+    vector<int> children;
     for(int child : adj[node]){
         if(child == par) continue;
-
+        sz++;
+        children.push_back(child);
         dfs(child, node);
-
-        b[node] += b[child];
-        dp[node] += dp[child];
+        dp2[node] += dp2[child];
     }
 
-    dp[node] += (b[node] + a[node]-1) * a[node];
-    b[node] += a[node];
+    pair<int,int> best = {-1e9, -1};
+    for(int mask = 0; mask < 1<<sz; mask++){
+        int res = 0;
+        for(int i = 0; i < sz; i++){
+            for(int j = 0; j < sz; j++){
+                if(!(mask & (1<<i)) || (mask & (1<<j))) continue;
+                res += dp[children[i]][1] * dp[children[j]][0];
+            }
+        }
+
+        for(int i = 0; i < sz; i++){
+            if(mask & (1<<i)) res += a[node] * dp[children[i]][1];
+        }
+        best = max(best, {res, mask});
+    }
+
+    
+
+    dp2[node] += best.first;
+    dp2[node] += a[node] * (a[node]-1) / 2;
+
+    for(int i = 0; i < sz; i++) dp[node][best.second & (1<<i)] += dp[children[i]][best.second & (1<<i)];
+    dp[node][0] += a[node];
+    dp[node][1] += a[node];
+    
+
+    cout << node << " " << dp2[node] << " " << dp[node][0] << " " << dp[node][1] << " " << bitset<2> (best.second) << "\n";
+
 }
+
 
 int main(){
     cin >> n;
@@ -36,21 +74,11 @@ int main(){
         int x; cin >> x;
 
         adj[x].push_back(i);
-        adj[i].push_back(x);
     }
 
-    int ans = 0;
+    dfs(1, -1);
 
-    //this is defo wrong
-    
-    for(int i = 1; i <= n; i++){
-        dfs(i,-1);
-        //cout << i << " " << dp[i] << " " << b[i] << "\n";
-        ans = max(ans,dp[i]);
-    }
+    cout << dp2[1] << '\n';
 
-    
 
-    cout << ans << "\n";
-    
 }

@@ -1,190 +1,192 @@
 #include <bits/stdc++.h>
 #include <iostream>
 
+
 using namespace std;
 
-const int MAXN = 2505;
-const int MAXM = 2e5+5;
+typedef long double ld;
 
-/*
-precompute for each cell the number of colors that they contain at least one of
-do this with PIE and difference array
-
-segtree over the number of shells in each grid
-query is a suffix sum
-
-updates subtract 1 from the grids it affects
-n^2 is just check every cell affected by the egg
-build dsu on each row and have it point to the next available/rightmost element in the set 
-for each one we just continue to look at sets that have not been touched 
-should amortize to o(n) for each row
-*/
+const int MAXN = 1e6+5;
+const double INF = 1e6+5;
+const long double LINF = 1e18;
 
 
-int n,k, m, parents[MAXN][MAXN], r[MAXN][MAXN], st[MAXM<<2], diff[MAXN][MAXN];
+int n, a[MAXN], k, cnt[MAXN];
 
-bool rem[MAXN][MAXN];
+long long place[MAXN];
+
+ld dp[MAXN];
+
+set<int> pos[MAXN];
+
+bool mini = false;
 
 
-int find(int row, int x){
-    while(x != parents[row][x]){
-        parents[row][x] = parents[row][parents[row][x]];
-        x = parents[row][x];
-    }
-    return x;
-}
 
-bool uni(int row, int x, int y){
-    x = find(row, x);
-    y = find(row, y);
+//(y - x + 1)^2 + dp[j+1]
+//(a - x) ^ k + b
 
-    if(x == y) return 0;
-    parents[row][x] = y;
-    r[row][y] = max(x,y);
-    return 1;
-}
+struct Line{
+  ld a,b;
 
-void update(int node, int l, int r, int i, int x){
-    if(l == r){
-        st[node] += x;
+  Line(){
+    a = b = LINF;
+  }
+
+  Line(ld _a, ld _b){
+    a = _a;
+    b = _b;
+  }
+
+  ld operator()(int x){
+
+    if(k == 4) return a * x + b;
+    ld base = a - x;
+    if(base < 0) return -LINF;
+    return (a-x) * sqrt(a-x) + b;
+  }
+}; 
+
+
+
+struct Lichao{
+  struct Node{
+    Line line;
+    Node *lchild = nullptr;
+    Node *rchild = nullptr;
+    bool hasLine = false;
+  };
+
+  Node *root;
+
+  Lichao(){
+    root = new Node;
+  }
+
+  void addLine(Line a, Node* &x, int l, int r, int p){
+    if(l >= p) return;
+    
+
+    if(x == nullptr) x = new Node;
+    
+
+    if(r > p){
+        int mid = (l+r)/2;
+        addLine(a, x->lchild, l, mid, p);
+        addLine(a, x->rchild, mid, r, p);
         return;
     }
 
-    int mid = (l+r)>>1;
-    if(i <= mid) update(node<<1,l,mid, i, x);
-    else update(node<<1|1, mid+1,r,i,x);
-    st[node] = st[node<<1] + st[node<<1|1];
-}
 
-int query(int node, int l, int r, int x, int y){
-    if(x > r || y < l) return 0;
-    if(x <= l && y >= r) return st[node];
+    if(!x->hasLine){
+    x->line = a;
+    x->hasLine = true;
+    return;
+    }
 
-    int mid = (l+r)>>1;
+    int mid = (l+r)/2;
 
-    return query(node<<1, l, mid, x, y) + query(node<<1|1, mid+1,r,x,y);
-}
+    if(a(mid) > x->line(mid)){
+    swap(a, x->line);
+    }
 
-void add(int x1, int y1, int x2, int y2, int v){
-    diff[x1][y1] += v;
-    diff[x2+1][y1] -= v;
-    diff[x1][y2+1] -= v;
-    diff[x2+1][y2+1] += v;
-}
+    if(l + 1 == r){
+    return;
+    }
+
+    if((a(mid) > x->line(mid)) == (a(l) > x->line(l))){
+    addLine(a, x->rchild, mid, r, p);
+    } else {
+    addLine(a, x->lchild, l, mid, p);
+    }
+    return;
+
+
+    
+  }
+
+  void addLine(Line a, int hi){
+    addLine(a, hi, hi);
+  }
+
+  void addLine(Line a, int hi, ld r){
+    int p = (int)min((ld)hi, r) + 1;
+    addLine(a, root, 1, hi, p);
+  }
+
+  ld query(int p, Node *x, int l, int r){
+    if(x == nullptr) return -LINF;
+    
+
+    ld ans = x->hasLine ? x->line(p) : -LINF;
+    int mid = (l+r)/2;
+
+    if(p < mid){
+      ans = max(ans, query(p, x->lchild, l, mid));
+    } else {
+      ans = max(ans, query(p, x->rchild, mid, r));
+    }
+
+    return ans;
+  }
+
+  ld query(int p, int hi){
+    return query(p, root, 1, hi);
+  }
+} trees[MAXN]; 
+
+
 
 
 int main(){
-    cin >> n >> k;
+  cin.tie(NULL) -> ios_base::sync_with_stdio(0);
+  
+  cin >> k >> n;
 
-    k--;
+  for(int i = 1; i <= n; i++){
+      cin >> a[i];
+      pos[a[i]].insert(i);
+  }
 
-    cin >> m;
-
-    for(int i = 1; i <= m; i++){
-        int l; cin >> l;
-
-        vector<pair<int,int>> shells;
-
-        for(int j = 1; j <= l; j++){
-            int x,y; cin >> x >> y;
-
-            shells.push_back({x,y});
-        }
-
-        for(int mask = 1; mask < 1<<l; mask++){
-
-            int tlx = 0;
-            int tly = 0;
-            int brx = 1e9;
-            int bry = 1e9;
-            for(int j = 0; j < l; j++){
-                if(mask & (1<<j)){
-                    tlx = max(tlx, shells[j].first);
-                    tly = max(tly, shells[j].second);
-                    brx = min(brx, shells[j].first);
-                    bry = min(bry, shells[j].second);
-                }
-            }
-
-            tlx -= k;
-            tly -= k;
+  for(int i = 1; i <= n; i++){
+      cnt[a[i]]++;
+      place[i] = cnt[a[i]];
+  }
+  
 
 
-            tlx = max(tlx, 1);
-            tly = max(tly, 1);
-            brx = min(brx, n-k);
-            bry = min(bry, n-k);
-            if(tlx > brx || tly > bry) continue;
+  if(k == 2){
+      cout << n << "\n";
+      return 0;
+  }
 
-            add(tlx, tly, brx, bry, pow(-1, !(__builtin_popcount(mask) & 1)));
-        }
-    }
-
-    for(int i = 1; i <= n; i++){
-        for(int j = 1; j <= n; j++) diff[i][j] += diff[i-1][j];
-    }
-
-    for(int i = 1; i <= n; i++){
-        for(int j = 1; j <= n; j++) diff[i][j] += diff[i][j-1];
-    }
-
-    double tot = 0;
-    for(int i = 1; i <= n; i++){
-        for(int j = 1; j <= n; j++){
-            parents[i][j] = i;
-            r[i][j] = i;
-            update(1,1,m, diff[i][j], 1);
-
-            if(i + k <= n && j + k <= n) tot++;
-        }
-    }
-
-    
-
-    int q; cin >> q;
-    while(q--){
-    
-        int t; cin >> t;
-
-        if(t == 1){
-            int x, y; cin >> x >> y;
-
-            
-            for(int i = max(x-k, 1); i <= min(x, n); i++){
-                int ty = max(y-k, 1);
-
-                while(ty <= min(y+k, n)){
-                    cout << i << " " << ty << "\n";
-                    if(!rem[i][ty]){
-                        rem[i][ty] = 1;
-                        update(1,1,m, diff[i][ty], -1);
-                    }
-
-                    if(ty > 1 && rem[i][ty-1]) uni(i, ty-1, ty);  
-                    ty = r[i][find(i, ty)]+1;
-                }
-            }
-
-            
-
-            
-        }
-        else{
-            int x; cin >> x;
-
-            //calculate tot
-
-            cout << setprecision(5) << fixed << query(1,1,m, x, m) / tot << "\n";
-            
-        }
-
-        
-
-       
-    }
+  for(int i = n; i >= 1; i--){
+      dp[i] = trees[a[i]].query(place[i], cnt[a[i]]);
+      if (dp[i] < -LINF) {
+        dp[i] = -LINF;
+      }
 
 
+      if(k == 4){
+          dp[i] += place[i] * place[i] - 2 * place[i] + 1;
+          dp[i] = max(dp[i], dp[i+1] + 1);
+          Line l;
 
+          l.a = -2 * place[i];
+          l.b = 2 * place[i] + place[i] * place[i] + dp[i+1];
+          trees[a[i]].addLine(l, cnt[a[i]], cnt[a[i]]);
+      }
+      else{
+          dp[i] = max(dp[i], dp[i+1] + 1);
+          Line l;
 
-    
+          l.a = place[i] + 1;
+          l.b = dp[i+1];
+
+          trees[a[i]].addLine(l, cnt[a[i]], l.a);
+      }
+  
+  }
+
+  cout << fixed << setprecision(6) << dp[1] << "\n";
 }

@@ -3,154 +3,61 @@
 
 using namespace std;
 
-const int MAXN = 2e5+5;
+const int MAXN = 1e4+5;
 
-int n, m, cF, cS, dist[MAXN], nxt[MAXN];
+#define int long long
 
-bool dp[MAXN], dp2[MAXN];
+int n, dp[2005][MAXN], MOD;
 
-set<int> adj[MAXN], level[MAXN];
-
-
-bool col[MAXN], sink[MAXN];
+bool prime[MAXN];
 
 /*
-level by level
-if two colored nodes thats bad 
-one colored we go through there
-no colored we choose next 
+cycle lengths sum to n
+
+lcm of cycle lengths = k
+use only primes to construct
+
+number of k that can be formed such that sum of prime factors <= n
 */
 
-int main(){
-    int tt; cin >> tt;
+int32_t main(){
+    freopen("exercise.in", "r", stdin);
+    freopen("exercise.out", "w", stdout);
+    cin >> n >> MOD;
 
-    while(tt--){
-        cin >> n >> m >> cF >> cS;
-
-        for(int i = 1; i <= n; i++){
-            dist[i] = 0;
-            nxt[i] = 0;
-            dp[i] = 0;
-            dp2[i] = 0;
-            adj[i].clear();
-            level[i].clear();
-            col[i] = 0;
-            sink[i] = 0;
+    memset(prime, 1, sizeof(prime));
+    prime[0] = 0;
+    prime[1] = 0;
+    for(int i = 2; i * i <= n; i++){
+        if(prime[i]){
+            for(int j = i*i; j <= n; j += i) prime[j] = 0;
         }
-
-        for(int i = 1; i <= cF; i++){
-            int x; cin >> x;
-
-            col[x]= 1;
-        }
-
-        for(int i = 1; i <= cS; i++){
-            int x; cin >> x;
-
-            sink[x] = 1;
-        }
-
-        for(int i = 1; i <= m; i++){
-
-            int x,y; cin >> x >> y;
-
-            adj[x].insert(y);
-            adj[y].insert(x);
-        }
-
-
-
-        queue<int> q;
-
-        q.push(1);
-        dist[1] = 1;
-
-        int mx = -1;
-
-        bool flag = 1;
-
-        while(q.size()){
-            int node = q.front();
-
-            level[dist[node]].insert(node);
-            mx = max(mx, dist[node]);
-
-            q.pop();
-
-            for(int child : adj[node]){
-                if(dist[child]) continue;
-
-                dist[child] = dist[node] + 1;
-                if(col[child]){
-                    flag &= !nxt[dist[node]];
-                    nxt[dist[node]] = child;
-                }
-                q.push(child);
-            }
-        }
-
-
-
-        if(!flag){
-            for(int i = 2; i <= n; i++) cout << "0";
-            cout << "\n";
-            continue;
-        }
-
-        int cap = 0;
-
-        for(int i = 1; i <= n; i++){
-            if(col[i]) cap = max(cap, dist[i]);
-        }
-
-        for(int i = mx; i >= 1; i--){
-            for(int node : level[i]){
-                dp[node] = (sink[node] && dist[node] >= cap);
-                
-                if(nxt[i]){
-                    if(adj[node].find(nxt[i]) == adj[node].end()){
-                        dp[node] = 0;
-                        continue;
-                    }
-                    dp[node] |= dp[nxt[i]];
-                    continue;
-                }
-
-                for(int child : adj[node]){
-                    if(dist[child] > dist[node]) dp[node] |= dp[child];
-                }
-            }
-        }
-
-        dp2[1] = 1;
-
-        for(int i = 1; i <= mx; i++){
-            for(int node : level[i]){
-                if(nxt[i]){
-                    if(adj[node].find(nxt[i]) == adj[node].end()) continue;
-                    dp2[nxt[i]] |= dp2[node];
-                    continue;
-                }
-
-                for(int child : adj[node]){
-                    if(dist[child] > dist[node]) dp2[child] |= dp2[node];
-                }
-            }
-        }
-
-        for(int i = 2; i <= n; i++){
-            cout << (dp2[i] && dp[i]);
-        }
-
-        cout << "\n";
-
-
-
-
-        
-
-
-
-
     }
+
+
+    vector<int> a;
+
+    a.push_back(0);
+
+    for(int i = 1; i <= n; i++){
+        if(prime[i]) a.push_back(i);
+    }
+
+    for(int i = 0; i <= n; i++) dp[(int)a.size()][i] = 1;
+
+    for(int i = a.size()-1; i >= 1; i--){
+        for(int j = 0; j <= n; j++){
+            int take = a[i];
+
+            dp[i][j] = dp[i+1][j];
+
+            
+            while(take <= j){
+                dp[i][j] = (dp[i][j] + (dp[i+1][j-take] * take) % MOD) % MOD;
+                take *= a[i];
+            }
+        }
+    }
+
+    cout << dp[1][n] << "\n";
 }

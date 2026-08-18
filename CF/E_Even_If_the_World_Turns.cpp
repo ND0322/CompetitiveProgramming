@@ -1,0 +1,8 @@
+/*
+decode what transformations happend and map them onto x
+and encode x itself with one swap
+
+the number of black squares is always coprime
+
+
+*/
