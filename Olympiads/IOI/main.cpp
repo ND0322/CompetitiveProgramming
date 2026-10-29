@@ -1,54 +1,75 @@
 #include <bits/stdc++.h>
 #include <iostream>
-#include <queue>
 
 using namespace std;
 
-//old code is too bad to copy 
+const int MAXN = 205;
 
-const int MAXN = 5e3+5;
-const int INF = 1e9;
+int dp[MAXN][MAXN][MAXN];
 
-int n, m, dist[MAXN][2];
+//current i, how many taken
 
-vector<pair<int,int>> adj[MAXN];
+long long get_cost(vector<int> a, vector<int> b){
 
-priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+    multiset<int> s;
 
-int main(){
-    cin >> n >> m;
+    for(int i = 0; i < a.size(); i++) s.insert(a[i]);
 
-    for(int i = 0; i < m; i++){
-        int x,y,c; cin >> x >> y >> c;
 
-        adj[x].push_back({y,c});
-        adj[y].push_back({x,c});
+    multiset<int> t;
+    for(int i = 0; i < b.size(); i++){
+        if(t.find(-a[b[i]]) != t.end()) t.erase(t.find(-a[b[i]]));
+        else t.insert(a[b[i]]);
+        s.erase(s.find(a[b[i]]));
     }
 
-    for(int i = 1; i <= n; i++) dist[i][0] = dist[i][1] = INF;
+    //we can move back into a
+    a.clear();
+    b.clear();
 
-    dist[1][0] = 0;
-    pq.push({0,1});
+    for(int i : s) a.push_back(i);
+    for(int i : t) b.push_back(-i);
 
-    while(pq.size()){
-        int node = pq.top().second;
-        int d = pq.top().first;
+    sort(b.begin(), b.end());
 
-        pq.pop();
-        //cout << node << " " << d << "\n";
+    int n = (int)a.size()-1;
+    int m = (int)b.size()-1;
 
-        for(auto [child, weight] : adj[node]){
-            if(dist[child][0] > d + weight){
-                dist[child][1] = dist[child][0];
-                dist[child][0] = d + weight;
-                pq.push({dist[child][0], child}); 
-            }
-            else if(dist[child][0] != d + weight && dist[child][1] > d + weight){
-                dist[child][1] = d+weight;
-                pq.push({dist[child][1], child});
+    if(!m) return 0;
+    if(m > n) return -1;
+
+    //dp time!
+    
+    for(int i = 0; i <= n; i++){
+        for(int j = 0; j <= n; j++){
+            for(int k = 0; k <= m; k++) dp[i][j][k] = 1e9;
+        }
+    }
+    
+    for(int l = n; l >= 0; l--){
+        for(int r = l; l <= n; r++){
+            for(int k = 0; k <= m; k++){
+                if(l == r){
+                    if(k == m-1) dp[i][j] = abs(a[l] - b[k]);
+                    continue;
+                }
+
+                if(r == l+1){
+                    if(k == m) dp[i][j] = abs(a[l] + a[r]);
+                    continue;
+                }
+
+                //left to b
+
+                if(k < m) 
             }
         }
     }
 
-    cout << dist[n][1] << "\n";
+
+}
+
+
+int main(){
+    cout << get_cost({1, 2, 2, 3}, {}) << "\n";
 }

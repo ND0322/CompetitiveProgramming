@@ -2,29 +2,52 @@
 #include <iostream>
 
 using namespace std;
-//obvious n * a * b * b for first couple subtasks
-//probably greedy optimization
+//exchange arguement
+//combine states 
 
-const int MAXN = 205;
+const int MAXN = 2005;
 
-int n, val[MAXN], w[MAXN], x[MAXN], dp[MAXN][MAXN][MAXN],a,b;
+int n, dp[MAXN][MAXN<<1], k1, k2;
+
+pair<int, pair<int,int>> a[MAXN];
 
 int main(){
-    cin >> n >> a >> b;
+    cin >> n >> k1 >> k2;
 
-    for(int i = 0; i < n; i++) cin >> val[i] >> w[i] >> x[i];
+    for(int i = 1; i <= n; i++) cin >> a[i].second.first >> a[i].second.second >> a[i].first;
 
-    for(int i = n-1; i >= 0; i--){
-        for(int j = 0; j <= a; j++){
-            for(int k = 0; k <= b; k++){
-                dp[i][j][k] = dp[i+1][j][k];
+    sort(a+1, a+n+1);
 
-                for(int l = 0; l * x[i] <= k && l <= w[i]; l++){
-                    if(j - w[i] + l >= 0) dp[i][j][k] = max(dp[i][j][k], dp[i+1][j - w[i] + l][k-l*x[i]] + val[i]);
+    for(int i = n; i >= 1; i--){
+        for(int j = 0; j <= k1 + k2; j++){
+            dp[i][j] = dp[i+1][j];
+
+            //buy 
+            if(j > k1){
+                int disc = j-k1;
+
+                //find real cost
+
+               
+
+                if(a[i].second.second < disc/a[i].first) dp[i][j] = max(dp[i][j], dp[i+1][j - a[i].first * (disc/a[i].first)] + a[i].second.first);
+                else{
+                    int c = a[i].second.second - disc / a[i].first;
+                    if(c <= k1) dp[i][j] = max(dp[i][j], dp[i+1][k1 - c] + a[i].second.first);
                 }
+
+            }
+            else{
+                //raw dawg
+
+                if(a[i].second.second <= j) dp[i][j] = max(dp[i][j], dp[i+1][j-a[i].second.second] + a[i].second.first);
             }
         }
     }
 
-    cout << dp[0][a][b] << "\n";
+    cout << dp[1][k1+k2] << "\n";
+
+
+
+    
 }

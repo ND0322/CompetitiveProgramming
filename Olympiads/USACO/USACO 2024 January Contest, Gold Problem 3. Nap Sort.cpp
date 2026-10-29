@@ -3,35 +3,89 @@
 
 using namespace std;
 
+#define int long long
+
 const int MAXN = 2e5+5;
 
 int n, a[MAXN];
 
-/*
-sort the array
+bool f(int x){
+    //some stuff
 
-helpers will take some subarrays away
+    x = x * (x+1) / 2;
+
+    int b = n;
+    int r = -1;
+
+    set<int> s;
+
+    for(int i = 1; i <= n; i++){
+        if(a[i] > x) break;
+        
+        s.insert(a[i]);
+        r = a[i];
+        b--;
+    }
+
+    if(!b) return 1;
+    if(n * (n+1) <= 2*x) return 1;
 
 
-ith element in remaining array
-
-will be added at time n + n - 1 ... n-i
-
-(2n - i)(i+1)/2
+    for(int a = 0; a <= n; a++){
+        if((a+b) * (a+b+1) > 2 * x) continue;
 
 
-f(#workers) is concave 
+        int cur = a + b;
+        int last = a+b;
+        int cnt = 0;
+       
+        int i = 0;
 
-bsearch and place into bessies reverse and greedy
-*/
+        while(cnt < a){
+            auto it = s.lower_bound(cur);
 
-int f(int x){
-    k = x-1;
+            if(it == s.end()) break;
+            cur += --last;
+            cnt++;
+        }
 
-    int ans = 0;
-    int mx = 0;
-
-    
+        if(cur <= r) continue;
+        if(cnt >= a) return 1; 
+    }
+    return 0;
 }
 
-int 
+int32_t main(){
+    int tt; cin >> tt;
+
+    while(tt--){
+        cin >> n;
+
+
+        for(int i = 1; i <= n; i++) cin >> a[i];
+
+        sort(a+1, a+n+1);
+
+
+    
+        int lo = 0;
+        int hi = n;
+
+        int ans = -1;
+
+        while(lo <= hi){
+            int mid = (lo+hi)>>1;
+
+            if(f(mid)){
+                hi = mid-1;
+                ans = mid;
+            }
+            else lo = mid+1;
+        }
+
+        cout << ans * (ans+1) / 2 << "\n";   
+        
+    
+        
+    }
+}
